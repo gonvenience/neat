@@ -24,6 +24,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/gonvenience/bunt"
@@ -60,59 +61,65 @@ func ContentColor(color colorful.Color) BoxStyle {
 	}
 }
 
-type buntBuffer struct {
-	buf bytes.Buffer
-}
-
-func (b *buntBuffer) Write(format string, a ...interface{}) {
-	b.buf.WriteString(fmt.Sprintf(format, a...))
-}
-
-func (b *buntBuffer) String() string {
-	return b.buf.String()
-}
-
 // ContentBox creates a string for the terminal where content is printed inside
 // a simple box shape.
 func ContentBox(headline string, content string, opts ...BoxStyle) string {
+	var buf bytes.Buffer
+	Box(&buf, headline, strings.NewReader(content), opts...)
+
+	return buf.String()
+}
+
+// Box writes the provided content in a simple box shape to given writer
+func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 	var (
-		beginning = "╭"
-		prefix    = "│"
-		lastline  = "╵"
+		beginning   = "╭"
+		prefix      = "│"
+		lastline    = "╵"
+		linewritten = false
+		outprint    = func(format string, a ...interface{}) {
+			out.Write([]byte(fmt.Sprintf(format, a...)))
+		}
 	)
 
+	// Process all provided box style options
 	options := &boxOptions{}
 	for _, f := range opts {
 		f(options)
 	}
 
+	// Apply headline color if it is set
 	if options.headlineColor != nil {
 		for _, pointer := range []*string{&beginning, &headline, &prefix, &lastline} {
-			*pointer = bunt.Style(
-				*pointer,
+			*pointer = bunt.Style(*pointer,
 				bunt.Foreground(*options.headlineColor),
 			)
 		}
 	}
 
+	// Apply headline styles if they are set
 	for _, style := range options.headlineStyles {
 		headline = bunt.Style(headline, style)
 	}
 
-	var buf buntBuffer
-	buf.Write("%s %s\n", beginning, headline)
-
-	scanner := bufio.NewScanner(strings.NewReader(content))
+	// Process each line of the content and apply styles if necessary
+	scanner := bufio.NewScanner(content)
 	for scanner.Scan() {
 		text := scanner.Text()
 		if options.contentColor != nil {
 			text = bunt.Style(text, bunt.Foreground(*options.contentColor))
 		}
 
-		buf.Write("%s %s\n", prefix, text)
+		if !linewritten {
+			// Write the headline string including the corner item
+			outprint("%s %s\n", beginning, headline)
+		}
+
+		outprint("%s %s\n", prefix, text)
+		linewritten = true
 	}
 
-	buf.Write("%s\n", lastline)
-
-	return buf.String()
+	if linewritten {
+		outprint("%s\n", lastline)
+	}
 }
