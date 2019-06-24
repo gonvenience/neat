@@ -50,7 +50,7 @@ content
 
 		It("should create a simply styled content box", func() {
 			Expect("\n" + ContentBox(headline, content)).To(BeEquivalentTo(Sprintf(`
-╭ *headline*
+╭ headline
 │ multi
 │ line
 │ content
@@ -62,7 +62,7 @@ content
 			Expect("\n" + ContentBox(headline, content,
 				HeadlineColor(DodgerBlue),
 			)).To(BeEquivalentTo(Sprintf(`
-DodgerBlue{╭ *headline*}
+DodgerBlue{╭} DodgerBlue{headline}
 DodgerBlue{│} multi
 DodgerBlue{│} line
 DodgerBlue{│} content
@@ -74,7 +74,7 @@ DodgerBlue{╵}
 			Expect("\n" + ContentBox(headline, content,
 				ContentColor(DimGray),
 			)).To(BeEquivalentTo(Sprintf(`
-╭ *headline*
+╭ headline
 │ DimGray{multi}
 │ DimGray{line}
 │ DimGray{content}
@@ -87,7 +87,7 @@ DodgerBlue{╵}
 				HeadlineColor(DodgerBlue),
 				ContentColor(DimGray),
 			)).To(BeEquivalentTo(Sprintf(`
-DodgerBlue{╭ *headline*}
+DodgerBlue{╭} DodgerBlue{headline}
 DodgerBlue{│} DimGray{multi}
 DodgerBlue{│} DimGray{line}
 DodgerBlue{│} DimGray{content}
@@ -108,7 +108,7 @@ Blue{~content~}
 		It("should preserve already existing colors and text emphasis", func() {
 			headline, content := setupTestStrings()
 			Expect("\n" + ContentBox(headline, content)).To(BeEquivalentTo(Sprintf(`
-╭ CornflowerBlue{*~headline~*}
+╭ CornflowerBlue{~headline~}
 │ Red{*multi*}
 │ Green{_line_}
 │ Blue{~content~}
@@ -121,7 +121,7 @@ Blue{~content~}
 			Expect("\n" + ContentBox(headline, content,
 				HeadlineColor(DimGray),
 			)).To(BeEquivalentTo(Sprintf(`
-DimGray{╭ *~headline~*}
+DimGray{╭} DimGray{~headline~}
 DimGray{│} Red{*multi*}
 DimGray{│} Green{_line_}
 DimGray{│} Blue{~content~}
@@ -134,7 +134,7 @@ DimGray{╵}
 			Expect("\n" + ContentBox(headline, content,
 				ContentColor(DimGray),
 			)).To(BeEquivalentTo(Sprintf(`
-╭ CornflowerBlue{*~headline~*}
+╭ CornflowerBlue{~headline~}
 │ DimGray{*multi*}
 │ DimGray{_line_}
 │ DimGray{~content~}
