@@ -21,6 +21,9 @@
 package neat_test
 
 import (
+	"bytes"
+	"io"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -166,6 +169,41 @@ DimGray{╵}
 │ DimGray{~content~}
 ╵
 `)))
+		})
+	})
+
+	Context("using reader directly", func() {
+		It("should create a box using a reader", func() {
+			r, w := io.Pipe()
+			go func() {
+				w.Write([]byte("multi\n"))
+				w.Write([]byte("line\n"))
+				w.Write([]byte("content\n"))
+				w.Close()
+			}()
+
+			var buf bytes.Buffer
+			Box(&buf, "headline", r)
+
+			Expect("\n" + buf.String()).To(BeEquivalentTo(Sprintf(`
+╭ headline
+│ multi
+│ line
+│ content
+╵
+`)))
+		})
+
+		It("should create no box if no content could be obtained from the reader", func() {
+			r, w := io.Pipe()
+			go func() {
+				w.Close()
+			}()
+
+			var buf bytes.Buffer
+			Box(&buf, "headline", r)
+
+			Expect(len(buf.String())).To(BeIdenticalTo(0))
 		})
 	})
 })
