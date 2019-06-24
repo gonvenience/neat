@@ -68,8 +68,9 @@ func (b *buntBuffer) String() string {
 // a simple box shape.
 func ContentBox(headline string, content string, opts ...BoxStyle) string {
 	var (
-		prefix   = "│"
-		lastline = "╵"
+		beginning = "╭"
+		prefix    = "│"
+		lastline  = "╵"
 	)
 
 	options := &boxOptions{}
@@ -77,12 +78,8 @@ func ContentBox(headline string, content string, opts ...BoxStyle) string {
 		f(options)
 	}
 
-	headline = bunt.Sprintf("╭ %s",
-		bunt.Style(headline, bunt.Bold()),
-	)
-
 	if options.headlineColor != nil {
-		for _, pointer := range []*string{&headline, &prefix, &lastline} {
+		for _, pointer := range []*string{&beginning, &headline, &prefix, &lastline} {
 			*pointer = bunt.Style(
 				*pointer,
 				bunt.Foreground(*options.headlineColor),
@@ -91,7 +88,7 @@ func ContentBox(headline string, content string, opts ...BoxStyle) string {
 	}
 
 	var buf buntBuffer
-	buf.Write("%s\n", headline)
+	buf.Write("%s %s\n", beginning, headline)
 
 	scanner := bufio.NewScanner(strings.NewReader(content))
 	for scanner.Scan() {
