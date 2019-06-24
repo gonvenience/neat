@@ -58,6 +58,32 @@ content
 `)))
 		})
 
+		It("should create a simply styled content box with bold headline", func() {
+			Expect("\n" + ContentBox(headline, content,
+				HeadlineStyle(Bold()),
+			)).To(BeEquivalentTo(Sprintf(`
+╭ *headline*
+│ multi
+│ line
+│ content
+╵
+`)))
+		})
+
+		It("should create a simply styled content box with italic, underline, and bold headline", func() {
+			Expect("\n" + ContentBox(headline, content,
+				HeadlineStyle(Italic()),
+				HeadlineStyle(Underline()),
+				HeadlineStyle(Bold()),
+			)).To(BeEquivalentTo(Sprintf(`
+╭ _*~headline~*_
+│ multi
+│ line
+│ content
+╵
+`)))
+		})
+
 		It("should create styled content box with headline colors", func() {
 			Expect("\n" + ContentBox(headline, content,
 				HeadlineColor(DodgerBlue),

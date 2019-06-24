@@ -34,14 +34,22 @@ import (
 type BoxStyle func(*boxOptions)
 
 type boxOptions struct {
-	headlineColor *colorful.Color
-	contentColor  *colorful.Color
+	headlineColor  *colorful.Color
+	contentColor   *colorful.Color
+	headlineStyles []bunt.StyleOption
 }
 
 // HeadlineColor sets the color of the headline text
 func HeadlineColor(color colorful.Color) BoxStyle {
 	return func(options *boxOptions) {
 		options.headlineColor = &color
+	}
+}
+
+// HeadlineStyle sets the style to be used for the headline text
+func HeadlineStyle(style bunt.StyleOption) BoxStyle {
+	return func(options *boxOptions) {
+		options.headlineStyles = append(options.headlineStyles, style)
 	}
 }
 
@@ -85,6 +93,10 @@ func ContentBox(headline string, content string, opts ...BoxStyle) string {
 				bunt.Foreground(*options.headlineColor),
 			)
 		}
+	}
+
+	for _, style := range options.headlineStyles {
+		headline = bunt.Style(headline, style)
 	}
 
 	var buf buntBuffer
