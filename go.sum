@@ -6,6 +6,8 @@ github.com/gonvenience/bunt v1.0.6 h1:b3KEkaSlbXx3m4s2Gg5NfKkbo3YR3daCbqeecbDG9I
 github.com/gonvenience/bunt v1.0.6/go.mod h1:lsyhkmNpSAzhVx059BD0fQy5F29rWcS6AHb7UWNlT/s=
 github.com/gonvenience/bunt v1.0.7 h1:g4xg5OlNNNGNnwRZ/F4r3inRgnbfrbjnw1lO4BODmb4=
 github.com/gonvenience/bunt v1.0.7/go.mod h1:lsyhkmNpSAzhVx059BD0fQy5F29rWcS6AHb7UWNlT/s=
+github.com/gonvenience/bunt v1.1.0 h1:jKaW7wwtIS1pW29ykowAv1m5TdSo47uZgtZRGD4ss2c=
+github.com/gonvenience/bunt v1.1.0/go.mod h1:lsyhkmNpSAzhVx059BD0fQy5F29rWcS6AHb7UWNlT/s=
 github.com/gonvenience/term v1.0.0 h1:joCB/j0Ngmdakd3muuLgAGPMf7DNKdoe708c1I6RiBs=
 github.com/gonvenience/term v1.0.0/go.mod h1:wohD4Iqso9Eol7qc2VnNhSFFhZxok5PvO7pZhdrAn4E=
 github.com/gonvenience/wrap v1.0.0 h1:N1zDI7z/uPd5ZQa8jII/ye/VENy3wgLXG962vw3ytMM=
