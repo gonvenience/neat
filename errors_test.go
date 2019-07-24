@@ -27,32 +27,31 @@ import (
 	"io"
 	"os"
 
+	. "github.com/gonvenience/neat"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	"github.com/gonvenience/bunt"
-	. "github.com/gonvenience/bunt"
-	. "github.com/gonvenience/neat"
-	. "github.com/gonvenience/wrap"
+	"github.com/gonvenience/wrap"
 	"github.com/pkg/errors"
 )
 
 var _ = Describe("error rendering", func() {
 	BeforeEach(func() {
-		ColorSetting = ON
-		TrueColorSetting = ON
+		bunt.ColorSetting = bunt.ON
+		bunt.TrueColorSetting = bunt.ON
 	})
 
 	AfterEach(func() {
-		ColorSetting = OFF
-		TrueColorSetting = OFF
+		bunt.ColorSetting = bunt.OFF
+		bunt.TrueColorSetting = bunt.OFF
 	})
 
 	Context("rendering errors", func() {
 		It("should render a context error using a box", func() {
-			context := Sprintf("unable to start %s", "Z")
+			context := fmt.Sprintf("unable to start %s", "Z")
 			cause := fmt.Errorf("failed to load X and Y")
-			err := Error(cause, context)
+			err := wrap.Error(cause, context)
 
 			Expect(SprintError(err)).To(
 				BeEquivalentTo(ContentBox(
@@ -111,10 +110,10 @@ var _ = Describe("error rendering", func() {
 
 		It("should render a context error inside a context error", func() {
 			root := fmt.Errorf("unable to load X")
-			cause := Errorf(root, "failed to start Y")
-			context := Sprintf("cannot process Z")
+			cause := wrap.Errorf(root, "failed to start Y")
+			context := fmt.Sprintf("cannot process Z")
 
-			err := Error(cause, context)
+			err := wrap.Error(cause, context)
 			Expect(SprintError(err)).To(
 				BeEquivalentTo(ContentBox(
 					"Error: "+context,
@@ -125,7 +124,7 @@ var _ = Describe("error rendering", func() {
 		})
 
 		It("should render github.com/pkg/errors package errors", func() {
-			message := Sprintf("unable to start Z")
+			message := fmt.Sprintf("unable to start Z")
 			cause := fmt.Errorf("failed to load X and Y")
 			err := errors.Wrap(cause, message)
 
