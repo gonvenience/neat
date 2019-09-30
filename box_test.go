@@ -123,6 +123,19 @@ DodgerBlue{│} DimGray{content}
 DodgerBlue{╵}
 `)))
 		})
+
+		It("should create a content box with no trailing line feed", func() {
+			Expect("\n" + ContentBox(
+				headline,
+				content,
+				NoFinalEndOfLine(),
+			)).To(BeEquivalentTo(Sprintf(`
+╭ headline
+│ multi
+│ line
+│ content
+╵`)))
+		})
 	})
 
 	Context("rendering content boxes with already colored content", func() {
