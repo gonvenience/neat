@@ -35,9 +35,10 @@ import (
 type BoxStyle func(*boxOptions)
 
 type boxOptions struct {
-	headlineColor  *colorful.Color
-	contentColor   *colorful.Color
-	headlineStyles []bunt.StyleOption
+	headlineColor      *colorful.Color
+	contentColor       *colorful.Color
+	headlineStyles     []bunt.StyleOption
+	noClosingEndOfLine bool
 }
 
 // HeadlineColor sets the color of the headline text
@@ -58,6 +59,13 @@ func HeadlineStyle(style bunt.StyleOption) BoxStyle {
 func ContentColor(color colorful.Color) BoxStyle {
 	return func(options *boxOptions) {
 		options.contentColor = &color
+	}
+}
+
+// NoFinalEndOfLine specifies that the rendering does not add a closing linefeed
+func NoFinalEndOfLine() BoxStyle {
+	return func(options *boxOptions) {
+		options.noClosingEndOfLine = true
 	}
 }
 
@@ -120,6 +128,11 @@ func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 	}
 
 	if linewritten {
-		outprint("%s\n", lastline)
+		outprint(lastline)
+
+		// If not configured otherwise, end with a linefeed
+		if !options.noClosingEndOfLine {
+			outprint("\n")
+		}
 	}
 }
