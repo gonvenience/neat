@@ -152,5 +152,21 @@ uno   dos tres  cuatro cinco
 			Expect(err).Should(MatchError(&ColumnIndexIsOutOfBoundsError{4}))
 			Expect(tableString).To(BeEquivalentTo(""))
 		})
+
+		It("should be possible to create a table without a final linefeed", func() {
+			input := [][]string{
+				{"eins", "zwei", "drei"},
+				{"one", "two", "three"},
+				{"un", "deux", "trois"},
+			}
+
+			expectedResult := `eins zwei drei
+one  two  three
+un   deux trois`
+
+			tableString, err := Table(input, OmitLinefeedAtTableEnd())
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tableString).To(BeEquivalentTo(expectedResult))
+		})
 	})
 })
