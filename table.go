@@ -41,11 +41,12 @@ const (
 )
 
 type options struct {
-	filler          string
-	separator       string
-	desiredRowWidth int
-	columnAlignment []Alignment
-	errors          []error
+	filler            string
+	separator         string
+	desiredRowWidth   int
+	columnAlignment   []Alignment
+	errors            []error
+	omitLinefeedAtEnd bool
 }
 
 func defaultOptions(cols int) options {
@@ -55,11 +56,12 @@ func defaultOptions(cols int) options {
 	}
 
 	return options{
-		filler:          " ",
-		separator:       " ",
-		desiredRowWidth: -1,
-		columnAlignment: alignments,
-		errors:          []error{},
+		filler:            " ",
+		separator:         " ",
+		desiredRowWidth:   -1,
+		columnAlignment:   alignments,
+		errors:            []error{},
+		omitLinefeedAtEnd: false,
 	}
 }
 
@@ -110,6 +112,13 @@ func AlignCenter(cols ...int) TableOption {
 	}
 }
 
+// OmitLinefeedAtTableEnd tells the table renderer to not add a final linefeed
+func OmitLinefeedAtTableEnd() TableOption {
+	return func(opts *options) {
+		opts.omitLinefeedAtEnd = true
+	}
+}
+
 // Table renders a string with a well spaced and aligned table output
 func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 	maxs, err := lookupMaxLengthPerColumn(table)
@@ -128,8 +137,12 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 		return "", options.errors[0]
 	}
 
-	var buf bytes.Buffer
-	for _, row := range table {
+	var (
+		buf     bytes.Buffer
+		lastIdx int = len(table) - 1
+	)
+
+	for i, row := range table {
 		if options.desiredRowWidth > 0 {
 			rawRowWidth := lookupPlainRowLength(row, maxs, options.separator)
 
@@ -164,17 +177,22 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 				x := bunt.PlainTextLength(fillment) / 2
 				buf.WriteString(fillment[:x])
 				buf.WriteString(cell)
-				if notLastRow {
+				if notLastCol {
 					buf.WriteString(fillment[x:])
 				}
 			}
 
-			if notLastRow {
+			if notLastCol {
 				buf.WriteString(options.separator)
 			}
 		}
 
-		buf.WriteString("\n")
+		// Make sure to add a linefeed to the end of each line, unless it is
+		// the last line of the table and the settings indicate that there must
+		// be no linefeed at the last line
+		if lastline := i >= lastIdx; !lastline || !options.omitLinefeedAtEnd {
+			buf.WriteString("\n")
+		}
 	}
 
 	return buf.String(), nil
