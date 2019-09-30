@@ -47,6 +47,7 @@ type options struct {
 	columnAlignment   []Alignment
 	errors            []error
 	omitLinefeedAtEnd bool
+	rowLimit          int
 }
 
 func defaultOptions(cols int) options {
@@ -62,6 +63,7 @@ func defaultOptions(cols int) options {
 		columnAlignment:   alignments,
 		errors:            []error{},
 		omitLinefeedAtEnd: false,
+		rowLimit:          -1,
 	}
 }
 
@@ -119,6 +121,13 @@ func OmitLinefeedAtTableEnd() TableOption {
 	}
 }
 
+// LimitRows sets a limit at which point the table is truncated
+func LimitRows(limit int) TableOption {
+	return func(opts *options) {
+		opts.rowLimit = limit
+	}
+}
+
 // Table renders a string with a well spaced and aligned table output
 func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 	maxs, err := lookupMaxLengthPerColumn(table)
@@ -138,11 +147,22 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 	}
 
 	var (
-		buf     bytes.Buffer
-		lastIdx int = len(table) - 1
+		buf      bytes.Buffer
+		idx      int = 0
+		rowLimit int = len(table)
 	)
 
-	for i, row := range table {
+	if options.rowLimit >= 0 {
+		rowLimit = options.rowLimit
+	}
+
+	if rowLimit > len(table) {
+		return "", &RowLimitExceedsTableSize{Limit: rowLimit, Rows: len(table)}
+	}
+
+	for ; idx < rowLimit; idx++ {
+		row := table[idx]
+
 		if options.desiredRowWidth > 0 {
 			rawRowWidth := lookupPlainRowLength(row, maxs, options.separator)
 
@@ -190,7 +210,13 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 		// Make sure to add a linefeed to the end of each line, unless it is
 		// the last line of the table and the settings indicate that there must
 		// be no linefeed at the last line
-		if lastline := i >= lastIdx; !lastline || !options.omitLinefeedAtEnd {
+		if lastline := idx >= rowLimit-1; !lastline || !options.omitLinefeedAtEnd {
+			// Special case in which the number of table rows is limited, add an
+			// ellipsis to indicate the truncation
+			if lastline && rowLimit >= 0 && rowLimit < len(table) {
+				buf.WriteString("\n[...]")
+			}
+
 			buf.WriteString("\n")
 		}
 	}

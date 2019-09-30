@@ -54,3 +54,14 @@ type ColumnIndexIsOutOfBoundsError struct {
 func (e *ColumnIndexIsOutOfBoundsError) Error() string {
 	return fmt.Sprintf("unable to render table, the provided column index %d is out of bounds", e.ColumnIdx)
 }
+
+// RowLimitExceedsTableSize is used to describe that the specified maximum row
+// number exceeds the actual number of rows in the table
+type RowLimitExceedsTableSize struct {
+	Limit int
+	Rows  int
+}
+
+func (e *RowLimitExceedsTableSize) Error() string {
+	return fmt.Sprintf("unable to render table, the provided row limit of %d exceeds the number of rows %d", e.Limit, e.Rows)
+}
