@@ -156,7 +156,7 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 		}
 
 		for y, cell := range row {
-			notLastRow := y < len(row)-1
+			notLastCol := y < len(row)-1
 			fillment := strings.Repeat(
 				options.filler,
 				maxs[y]-bunt.PlainTextLength(cell),
@@ -165,7 +165,7 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 			switch options.columnAlignment[y] {
 			case Left:
 				buf.WriteString(cell)
-				if notLastRow {
+				if notLastCol {
 					buf.WriteString(fillment)
 				}
 
