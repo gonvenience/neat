@@ -152,12 +152,8 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 		rowLimit int = len(table)
 	)
 
-	if options.rowLimit >= 0 {
+	if (options.rowLimit >= 0) && (options.rowLimit < len(table)) {
 		rowLimit = options.rowLimit
-	}
-
-	if rowLimit > len(table) {
-		return "", &RowLimitExceedsTableSize{Limit: rowLimit, Rows: len(table)}
 	}
 
 	for ; idx < rowLimit; idx++ {

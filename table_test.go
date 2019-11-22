@@ -186,16 +186,21 @@ one  two  three
 			Expect(tableString).To(BeEquivalentTo(expectedResult))
 		})
 
-		It("should fail when using an invalid row limit", func() {
+		It("should not fail when using a row limit which is greater than the table length", func() {
 			input := [][]string{
 				{"eins", "zwei", "drei"},
 				{"one", "two", "three"},
 				{"un", "deux", "trois"},
 			}
 
-			tableString, err := Table(input, LimitRows(4))
-			Expect(err).Should(MatchError(&RowLimitExceedsTableSize{4, 3}))
-			Expect(tableString).To(BeEquivalentTo(""))
+			expectedResult := `eins zwei drei
+one  two  three
+un   deux trois
+`
+
+			tableString, err := Table(input, LimitRows(25))
+			Expect(err).ToNot(HaveOccurred())
+			Expect(tableString).To(BeEquivalentTo(expectedResult))
 		})
 	})
 })
