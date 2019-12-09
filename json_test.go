@@ -21,18 +21,19 @@
 package neat_test
 
 import (
-	. "github.com/gonvenience/neat"
-	yaml "gopkg.in/yaml.v2"
+	yamlv2 "gopkg.in/yaml.v2"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	. "github.com/gonvenience/neat"
 )
 
 var _ = Describe("YAML to JSON tests", func() {
 	Context("Processing valid YAML input", func() {
 		It("should convert YAML to JSON", func() {
-			var content yaml.MapSlice
-			if err := yaml.Unmarshal([]byte(`---
+			var content yamlv2.MapSlice
+			if err := yamlv2.Unmarshal([]byte(`---
 name: foobar
 list:
 - A

@@ -27,9 +27,10 @@ import (
 	"io"
 	"os"
 
-	. "github.com/gonvenience/neat"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	. "github.com/gonvenience/neat"
 
 	"github.com/gonvenience/bunt"
 	"github.com/gonvenience/wrap"

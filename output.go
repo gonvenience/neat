@@ -27,7 +27,7 @@ import (
 
 	"github.com/gonvenience/bunt"
 	colorful "github.com/lucasb-eyer/go-colorful"
-	yaml "gopkg.in/yaml.v2"
+	yamlv2 "gopkg.in/yaml.v2"
 )
 
 // DefaultColorSchema is a prepared usable color schema for the neat output
@@ -108,7 +108,7 @@ func (p *OutputProcessor) determineColorByType(obj interface{}) string {
 
 func (p *OutputProcessor) isScalar(obj interface{}) bool {
 	switch obj.(type) {
-	case yaml.MapSlice, []interface{}, []yaml.MapSlice:
+	case yamlv2.MapSlice, []interface{}, []yamlv2.MapSlice:
 		return false
 
 	default:
@@ -116,7 +116,7 @@ func (p *OutputProcessor) isScalar(obj interface{}) bool {
 	}
 }
 
-func (p *OutputProcessor) simplify(list []yaml.MapSlice) []interface{} {
+func (p *OutputProcessor) simplify(list []yamlv2.MapSlice) []interface{} {
 	result := make([]interface{}, len(list))
 	for idx, value := range list {
 		result[idx] = value

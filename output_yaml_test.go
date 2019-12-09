@@ -25,14 +25,15 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/gonvenience/neat"
-	yaml "gopkg.in/yaml.v2"
+
+	yamlv2 "gopkg.in/yaml.v2"
 )
 
 var _ = Describe("JSON to YAML tests", func() {
 	Context("Processing valid JSON input", func() {
 		It("should convert JSON to YAML", func() {
-			var content yaml.MapSlice
-			if err := yaml.Unmarshal([]byte(`{ "name": "foobar", "list": [A, B, C] }`), &content); err != nil {
+			var content yamlv2.MapSlice
+			if err := yamlv2.Unmarshal([]byte(`{ "name": "foobar", "list": [A, B, C] }`), &content); err != nil {
 				Fail(err.Error())
 			}
 
@@ -48,8 +49,8 @@ list:
 		})
 
 		It("should preserve the order inside the structure", func() {
-			var content yaml.MapSlice
-			err := yaml.Unmarshal([]byte(`{ "list": [C, B, A], "name": "foobar" }`), &content)
+			var content yamlv2.MapSlice
+			err := yamlv2.Unmarshal([]byte(`{ "list": [C, B, A], "name": "foobar" }`), &content)
 			if err != nil {
 				Fail(err.Error())
 			}

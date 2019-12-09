@@ -23,10 +23,10 @@ package neat_test
 import (
 	"testing"
 
-	. "github.com/gonvenience/bunt"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	. "github.com/gonvenience/bunt"
 )
 
 func TestCore(t *testing.T) {
