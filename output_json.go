@@ -26,7 +26,7 @@ import (
 	"strings"
 
 	"github.com/gonvenience/bunt"
-	yaml "gopkg.in/yaml.v2"
+	yamlv2 "gopkg.in/yaml.v2"
 )
 
 // ToJSONString marshals the provided object into JSON with text decorations
@@ -66,7 +66,7 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 
 		return fmt.Sprintf("[%s]", strings.Join(result, ", ")), nil
 
-	case yaml.MapSlice:
+	case yamlv2.MapSlice:
 		result := make([]string, 0)
 		for _, i := range v {
 			value, err := p.ToCompactJSON(i)
@@ -78,7 +78,7 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 
 		return fmt.Sprintf("{%s}", strings.Join(result, ", ")), nil
 
-	case yaml.MapItem:
+	case yamlv2.MapItem:
 		key, keyError := p.ToCompactJSON(v.Key)
 		if keyError != nil {
 			return "", keyError
@@ -103,7 +103,7 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 
 func (p *OutputProcessor) neatJSON(prefix string, obj interface{}) (string, error) {
 	switch t := obj.(type) {
-	case yaml.MapSlice:
+	case yamlv2.MapSlice:
 		if err := p.neatJSONofYAMLMapSlice(prefix, t); err != nil {
 			return "", err
 		}
@@ -113,7 +113,7 @@ func (p *OutputProcessor) neatJSON(prefix string, obj interface{}) (string, erro
 			return "", err
 		}
 
-	case []yaml.MapSlice:
+	case []yamlv2.MapSlice:
 		if err := p.neatJSONofSlice(prefix, p.simplify(t)); err != nil {
 			return "", err
 		}
@@ -128,7 +128,7 @@ func (p *OutputProcessor) neatJSON(prefix string, obj interface{}) (string, erro
 	return p.data.String(), nil
 }
 
-func (p *OutputProcessor) neatJSONofYAMLMapSlice(prefix string, mapslice yaml.MapSlice) error {
+func (p *OutputProcessor) neatJSONofYAMLMapSlice(prefix string, mapslice yamlv2.MapSlice) error {
 	if len(mapslice) == 0 {
 		p.out.WriteString(p.colorize("{}", "emptyStructures"))
 		return nil

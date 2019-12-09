@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/gonvenience/bunt"
-	yaml "gopkg.in/yaml.v2"
+	yamlv2 "gopkg.in/yaml.v2"
 )
 
 // ToYAMLString marshals the provided object into YAML with text decorations
@@ -48,7 +48,7 @@ func (p *OutputProcessor) ToYAML(obj interface{}) (string, error) {
 
 func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, obj interface{}) error {
 	switch t := obj.(type) {
-	case yaml.MapSlice:
+	case yamlv2.MapSlice:
 		if err := p.neatYAMLofMapSlice(prefix, skipIndentOnFirstLine, t); err != nil {
 			return err
 		}
@@ -58,7 +58,7 @@ func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, ob
 			return err
 		}
 
-	case []yaml.MapSlice:
+	case []yamlv2.MapSlice:
 		if err := p.neatYAMLofSlice(prefix, skipIndentOnFirstLine, p.simplify(t)); err != nil {
 			return err
 		}
@@ -72,7 +72,7 @@ func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, ob
 	return nil
 }
 
-func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLine bool, mapslice yaml.MapSlice) error {
+func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLine bool, mapslice yamlv2.MapSlice) error {
 	for i, mapitem := range mapslice {
 		if !skipIndentOnFirstLine || i > 0 {
 			p.out.WriteString(prefix)
@@ -86,15 +86,15 @@ func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLin
 		p.out.WriteString(p.colorize(keyString, "keyColor"))
 
 		switch mapitem.Value.(type) {
-		case yaml.MapSlice:
-			if len(mapitem.Value.(yaml.MapSlice)) == 0 {
+		case yamlv2.MapSlice:
+			if len(mapitem.Value.(yamlv2.MapSlice)) == 0 {
 				p.out.WriteString(" ")
 				p.out.WriteString(p.colorize("{}", "emptyStructures"))
 				p.out.WriteString("\n")
 
 			} else {
 				p.out.WriteString("\n")
-				if err := p.neatYAMLofMapSlice(prefix+p.prefixAdd(), false, mapitem.Value.(yaml.MapSlice)); err != nil {
+				if err := p.neatYAMLofMapSlice(prefix+p.prefixAdd(), false, mapitem.Value.(yamlv2.MapSlice)); err != nil {
 					return err
 				}
 			}
@@ -144,7 +144,7 @@ func (p *OutputProcessor) neatYAMLofScalar(prefix string, skipIndentOnFirstLine 
 	}
 
 	// Any other value: Run through Go YAML marshaller and colorize afterwards
-	data, err := yaml.Marshal(obj)
+	data, err := yamlv2.Marshal(obj)
 	if err != nil {
 		return err
 	}
