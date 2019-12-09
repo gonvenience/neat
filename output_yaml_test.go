@@ -29,8 +29,8 @@ import (
 	yamlv2 "gopkg.in/yaml.v2"
 )
 
-var _ = Describe("JSON to YAML tests", func() {
-	Context("Processing valid JSON input", func() {
+var _ = Describe("YAML output", func() {
+	Context("process input JSON for YAML output", func() {
 		It("should convert JSON to YAML", func() {
 			var content yamlv2.MapSlice
 			if err := yamlv2.Unmarshal([]byte(`{ "name": "foobar", "list": [A, B, C] }`), &content); err != nil {
@@ -63,6 +63,100 @@ list:
 - B
 - A
 name: foobar
+`))
+		})
+	})
+
+	Context("create YAML output", func() {
+		It("should create YAML output for a simple list", func() {
+			result, err := ToYAMLString([]interface{}{
+				"one",
+				"two",
+				"three",
+			})
+
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(`- one
+- two
+- three
+`))
+		})
+
+		It("should create YAML output for a specific YAML v2 MapSlice list", func() {
+			result, err := ToYAMLString([]yamlv2.MapSlice{
+				yamlv2.MapSlice{
+					yamlv2.MapItem{
+						Key:   "name",
+						Value: "one",
+					},
+				},
+				yamlv2.MapSlice{
+					yamlv2.MapItem{
+						Key:   "name",
+						Value: "two",
+					},
+				},
+			})
+
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(`- name: one
+- name: two
+`))
+		})
+
+		It("should create YAML output of nested maps", func() {
+			result, err := ToYAMLString(yamlv2.MapSlice{
+				yamlv2.MapItem{
+					Key: "map",
+					Value: yamlv2.MapSlice{
+						yamlv2.MapItem{
+							Key: "foo",
+							Value: yamlv2.MapSlice{
+								yamlv2.MapItem{
+									Key: "bar",
+									Value: yamlv2.MapSlice{
+										yamlv2.MapItem{
+											Key:   "name",
+											Value: "foobar",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			})
+
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(`map:
+  foo:
+    bar:
+      name: foobar
+`))
+		})
+
+		It("should create YAML output for empty structures", func() {
+			result, err := ToYAMLString(yamlv2.MapSlice{
+				yamlv2.MapItem{
+					Key:   "empty-map",
+					Value: yamlv2.MapSlice{},
+				},
+
+				yamlv2.MapItem{
+					Key:   "empty-list",
+					Value: []interface{}{},
+				},
+
+				yamlv2.MapItem{
+					Key:   "empty-scalar",
+					Value: nil,
+				},
+			})
+
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(`empty-map: {}
+empty-list: []
+empty-scalar: null
 `))
 		})
 	})
