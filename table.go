@@ -148,8 +148,8 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 
 	var (
 		buf      bytes.Buffer
-		idx      int = 0
-		rowLimit int = len(table)
+		idx      = 0
+		rowLimit = len(table)
 	)
 
 	if (options.rowLimit >= 0) && (options.rowLimit < len(table)) {
