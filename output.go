@@ -33,6 +33,7 @@ import (
 // DefaultColorSchema is a prepared usable color schema for the neat output
 // processor which is loosly based upon the colors used by Atom
 var DefaultColorSchema = map[string]colorful.Color{
+	"documentStart":      bunt.LightSlateGray,
 	"keyColor":           bunt.IndianRed,
 	"indentLineColor":    {R: 0.14, G: 0.14, B: 0.14},
 	"scalarDefaultColor": bunt.PaleGreen,
@@ -41,7 +42,9 @@ var DefaultColorSchema = map[string]colorful.Color{
 	"intColor":           bunt.MediumPurple,
 	"multiLineTextColor": bunt.Aquamarine,
 	"nullColor":          bunt.DarkOrange,
+	"binaryColor":        bunt.Aqua,
 	"emptyStructures":    bunt.PaleGoldenrod,
+	"commentColor":       bunt.DimGray,
 }
 
 // OutputProcessor provides the functionality to output neat YAML strings using

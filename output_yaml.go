@@ -26,6 +26,7 @@ import (
 
 	"github.com/gonvenience/bunt"
 	yamlv2 "gopkg.in/yaml.v2"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 // ToYAMLString marshals the provided object into YAML with text decorations
@@ -62,6 +63,12 @@ func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, ob
 		if err := p.neatYAMLofSlice(prefix, skipIndentOnFirstLine, p.simplify(t)); err != nil {
 			return err
 		}
+
+	case yamlv3.Node:
+		return p.neatYAMLofNode(prefix, skipIndentOnFirstLine, &t)
+
+	case *yamlv3.Node:
+		return p.neatYAMLofNode(prefix, skipIndentOnFirstLine, t)
 
 	default:
 		if err := p.neatYAMLofScalar(prefix, skipIndentOnFirstLine, obj); err != nil {
@@ -160,6 +167,145 @@ func (p *OutputProcessor) neatYAMLofScalar(prefix string, skipIndentOnFirstLine 
 
 		p.out.WriteString(p.colorize(line, color))
 		p.out.WriteString("\n")
+	}
+
+	return nil
+}
+
+func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bool, node *yamlv3.Node) error {
+	keyStyles := []bunt.StyleOption{}
+	if p.boldKeys {
+		keyStyles = append(keyStyles, bunt.Bold())
+	}
+
+	switch node.Kind {
+	case yamlv3.DocumentNode:
+		bunt.Fprint(p.out, p.colorize("---", "documentStart"), "\n")
+		for _, content := range node.Content {
+			if err := p.neatYAML(prefix, false, content); err != nil {
+				return err
+			}
+		}
+
+		if len(node.FootComment) > 0 {
+			fmt.Fprint(p.out, p.colorize(node.FootComment, "commentColor"), "\n")
+		}
+
+	case yamlv3.SequenceNode:
+		for _, entry := range node.Content {
+			fmt.Fprint(p.out, prefix, p.colorize("-", "dashColor"), " ")
+			if err := p.neatYAMLofNode(prefix+p.prefixAdd(), skipIndentOnFirstLine, entry); err != nil {
+				return err
+			}
+		}
+
+	case yamlv3.MappingNode:
+		for i := 0; i < len(node.Content); i += 2 {
+			if !skipIndentOnFirstLine || i > 0 {
+				fmt.Fprint(p.out, prefix)
+			}
+
+			key := node.Content[i]
+			if len(key.HeadComment) > 0 {
+				fmt.Fprint(p.out, p.colorize(key.HeadComment, "commentColor"), "\n")
+			}
+			fmt.Fprint(p.out,
+				bunt.Style(p.colorize(fmt.Sprintf("%s:", key.Value), "keyColor"), keyStyles...),
+			)
+
+			value := node.Content[i+1]
+			switch value.Kind {
+			case yamlv3.MappingNode:
+				if len(value.Content) == 0 {
+					fmt.Fprint(p.out, " ", p.colorize("{}", "emptyStructures"), "\n")
+				} else {
+					fmt.Fprint(p.out, "\n")
+					if err := p.neatYAMLofNode(prefix+p.prefixAdd(), false, value); err != nil {
+						return err
+					}
+				}
+
+			case yamlv3.SequenceNode:
+				if len(value.Content) == 0 {
+					fmt.Fprint(p.out, " ", p.colorize("[]", "emptyStructures"), "\n")
+				} else {
+					fmt.Fprint(p.out, "\n")
+					if err := p.neatYAMLofNode(prefix, false, value); err != nil {
+						return err
+					}
+				}
+
+			case yamlv3.ScalarNode:
+				fmt.Fprint(p.out, " ")
+				if err := p.neatYAMLofNode(prefix+p.prefixAdd(), false, value); err != nil {
+					return err
+				}
+
+			default:
+				return fmt.Errorf("kind %v in mapping context as value is not implemented yet", value.Kind)
+			}
+
+			if len(key.FootComment) > 0 {
+				fmt.Fprint(p.out, p.colorize(key.FootComment, "commentColor"), "\n")
+			}
+		}
+
+	case yamlv3.ScalarNode:
+		var colorName = "scalarDefaultColor"
+		switch node.Tag {
+		case "!!binary":
+			colorName = "binaryColor"
+
+		case "!!str":
+			colorName = "scalarDefaultColor"
+
+		case "!!float":
+			colorName = "floatColor"
+
+		case "!!int":
+			colorName = "intColor"
+
+		case "!!bool":
+			colorName = "boolColor"
+		}
+
+		if node.Value == "nil" {
+			colorName = "nullColor"
+		}
+
+		lines := strings.Split(node.Value, "\n")
+		switch len(lines) {
+		case 1:
+			fmt.Fprint(p.out, p.colorize(node.Value, colorName))
+
+		default:
+			colorName = "multiLineTextColor"
+			fmt.Fprint(p.out, p.colorize("|", colorName), "\n")
+			for i, line := range lines {
+				if i == len(lines)-1 {
+					continue
+				}
+
+				fmt.Fprint(p.out, prefix, p.colorize(line, colorName))
+
+				if i < len(lines)-2 {
+					fmt.Fprint(p.out, "\n")
+				}
+			}
+		}
+
+		if len(node.LineComment) > 0 {
+			fmt.Fprint(p.out, " ", p.colorize(node.LineComment, "commentColor"))
+		}
+
+		fmt.Fprint(p.out, "\n")
+
+		if len(node.FootComment) > 0 {
+			fmt.Fprint(p.out, p.colorize(node.FootComment, "commentColor"), "\n")
+		}
+
+	case yamlv3.AliasNode:
+		return fmt.Errorf("kind AliasNode is not implemented yet")
 	}
 
 	return nil

@@ -27,6 +27,7 @@ import (
 	. "github.com/gonvenience/neat"
 
 	yamlv2 "gopkg.in/yaml.v2"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 var _ = Describe("YAML output", func() {
@@ -67,7 +68,7 @@ name: foobar
 		})
 	})
 
-	Context("create YAML output", func() {
+	Context("create YAML output (go-yaml v2)", func() {
 		It("should create YAML output for a simple list", func() {
 			result, err := ToYAMLString([]interface{}{
 				"one",
@@ -84,13 +85,13 @@ name: foobar
 
 		It("should create YAML output for a specific YAML v2 MapSlice list", func() {
 			result, err := ToYAMLString([]yamlv2.MapSlice{
-				yamlv2.MapSlice{
+				{
 					yamlv2.MapItem{
 						Key:   "name",
 						Value: "one",
 					},
 				},
-				yamlv2.MapSlice{
+				{
 					yamlv2.MapItem{
 						Key:   "name",
 						Value: "two",
@@ -158,6 +159,94 @@ name: foobar
 empty-list: []
 empty-scalar: null
 `))
+		})
+	})
+
+	Context("create YAML output (go-yaml v3)", func() {
+		It("should create YAML output based on YAML node structure", func() {
+			example := []byte(`---
+# before document
+
+# before map
+map: # at map definition
+  key: value # value
+# after map
+
+# before scalar
+scalars: # at scalar definition
+  boolean: true # true
+  number: 42 # 42
+  float: 47.11
+  string: foobar
+  data: !!binary Zm9vYmFyCg==
+# after scaler
+
+# before list
+list: # at list definition
+- one # one
+- two # two
+# after list
+
+# before multiline
+multiline: |
+  This is
+  a multi
+  line te
+  xt.
+# after multiline
+
+# before zeros
+zeros:
+  map: {}
+  list: []
+  scalar: nil
+# after zeros
+
+# after document
+`)
+
+			expected := `---
+# before document
+
+# before map
+map:
+  key: value # value
+# after map
+# before scalar
+scalars:
+  boolean: true # true
+  number: 42 # 42
+  float: 47.11
+  string: foobar
+  data: Zm9vYmFyCg==
+# after scaler
+# before list
+list:
+- one # one
+- two # two
+# after list
+# before multiline
+multiline: |
+  This is
+  a multi
+  line te
+  xt.
+# after multiline
+# before zeros
+zeros:
+  map: {}
+  list: []
+  scalar: nil
+# after zeros
+# after document
+`
+
+			var node yamlv3.Node
+			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
+
+			output, err := ToYAMLString(node)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output).To(BeEquivalentTo(expected))
 		})
 	})
 })
