@@ -45,6 +45,7 @@ var DefaultColorSchema = map[string]colorful.Color{
 	"binaryColor":        bunt.Aqua,
 	"emptyStructures":    bunt.PaleGoldenrod,
 	"commentColor":       bunt.DimGray,
+	"anchorColor":        bunt.CornflowerBlue,
 }
 
 // OutputProcessor provides the functionality to output neat YAML strings using

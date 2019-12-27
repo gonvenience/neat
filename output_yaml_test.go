@@ -165,27 +165,24 @@ empty-scalar: null
 	Context("create YAML output (go-yaml v3)", func() {
 		It("should create YAML output based on YAML node structure", func() {
 			example := []byte(`---
-# before document
+# start of document
 
 # before map
 map: # at map definition
   key: value # value
-# after map
 
-# before scalar
+# before scalars
 scalars: # at scalar definition
   boolean: true # true
   number: 42 # 42
   float: 47.11
   string: foobar
   data: !!binary Zm9vYmFyCg==
-# after scaler
 
 # before list
 list: # at list definition
 - one # one
 - two # two
-# after list
 
 # before multiline
 multiline: |
@@ -193,52 +190,76 @@ multiline: |
   a multi
   line te
   xt.
-# after multiline
 
 # before zeros
 zeros:
   map: {}
   list: []
   scalar: nil
-# after zeros
 
-# after document
+# before anchors
+anchors:
+  scalar: &scalaranchor 42
+  same-scalar: *scalaranchor
+  list: &listanchor
+  - one
+  - two
+  same-list: *listanchor
+  empty-list: &emptylist []
+  same-empty-list: *emptylist
+  map: &mapanchor
+    key: value
+  same-map: *mapanchor
+  empty-map: &emptymap {}
+  same-empty-map: *emptymap
+
+# end of document
 `)
 
 			expected := `---
-# before document
+# start of document
 
 # before map
 map:
   key: value # value
-# after map
-# before scalar
+# before scalars
 scalars:
   boolean: true # true
   number: 42 # 42
   float: 47.11
   string: foobar
   data: Zm9vYmFyCg==
-# after scaler
 # before list
 list:
 - one # one
 - two # two
-# after list
 # before multiline
 multiline: |
   This is
   a multi
   line te
   xt.
-# after multiline
 # before zeros
 zeros:
   map: {}
   list: []
   scalar: nil
-# after zeros
-# after document
+# before anchors
+anchors:
+  scalar: &scalaranchor 42
+  same-scalar: *scalaranchor
+  list: &listanchor
+  - one
+  - two
+  same-list: *listanchor
+  empty-list: &emptylist []
+  same-empty-list: *emptylist
+  map: &mapanchor
+    key: value
+  same-map: *mapanchor
+  empty-map: &emptymap {}
+  same-empty-map: *emptymap
+# end of document
 `
 
 			var node yamlv3.Node
