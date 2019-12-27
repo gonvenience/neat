@@ -217,9 +217,9 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 			switch value.Kind {
 			case yamlv3.MappingNode:
 				if len(value.Content) == 0 {
-					fmt.Fprint(p.out, " ", p.colorize("{}", "emptyStructures"), "\n")
+					fmt.Fprint(p.out, p.createAnchorDefinition(value), " ", p.colorize("{}", "emptyStructures"), "\n")
 				} else {
-					fmt.Fprint(p.out, "\n")
+					fmt.Fprint(p.out, p.createAnchorDefinition(value), "\n")
 					if err := p.neatYAMLofNode(prefix+p.prefixAdd(), false, value); err != nil {
 						return err
 					}
@@ -227,22 +227,22 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 
 			case yamlv3.SequenceNode:
 				if len(value.Content) == 0 {
-					fmt.Fprint(p.out, " ", p.colorize("[]", "emptyStructures"), "\n")
+					fmt.Fprint(p.out, p.createAnchorDefinition(value), " ", p.colorize("[]", "emptyStructures"), "\n")
 				} else {
-					fmt.Fprint(p.out, "\n")
+					fmt.Fprint(p.out, p.createAnchorDefinition(value), "\n")
 					if err := p.neatYAMLofNode(prefix, false, value); err != nil {
 						return err
 					}
 				}
 
 			case yamlv3.ScalarNode:
-				fmt.Fprint(p.out, " ")
+				fmt.Fprint(p.out, p.createAnchorDefinition(value), " ")
 				if err := p.neatYAMLofNode(prefix+p.prefixAdd(), false, value); err != nil {
 					return err
 				}
 
-			default:
-				return fmt.Errorf("kind %v in mapping context as value is not implemented yet", value.Kind)
+			case yamlv3.AliasNode:
+				fmt.Fprintf(p.out, " %s\n", p.colorize("*"+value.Value, "anchorColor"))
 			}
 
 			if len(key.FootComment) > 0 {
@@ -309,4 +309,12 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 	}
 
 	return nil
+}
+
+func (p *OutputProcessor) createAnchorDefinition(node *yamlv3.Node) string {
+	if len(node.Anchor) != 0 {
+		return fmt.Sprint(" ", p.colorize("&"+node.Anchor, "anchorColor"))
+	}
+
+	return ""
 }
