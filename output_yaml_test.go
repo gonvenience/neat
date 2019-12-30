@@ -269,5 +269,60 @@ anchors:
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
 		})
+
+		It("should create YAML output of so called named entry lists", func() {
+			example := []byte(`---
+yaml:
+  named-entry-list-using-name:
+  - name: A
+  - name: B
+  - name: C
+  - name: X
+  - name: Z
+
+  named-entry-list-using-key:
+  - key: A
+  - key: B
+  - key: C
+  - key: X
+  - key: Z
+
+  named-entry-list-using-id:
+  - id: A
+  - id: B
+  - id: C
+  - id: X
+  - id: Z
+`)
+
+			expected := `---
+yaml:
+  named-entry-list-using-name:
+  - name: A
+  - name: B
+  - name: C
+  - name: X
+  - name: Z
+  named-entry-list-using-key:
+  - key: A
+  - key: B
+  - key: C
+  - key: X
+  - key: Z
+  named-entry-list-using-id:
+  - id: A
+  - id: B
+  - id: C
+  - id: X
+  - id: Z
+`
+
+			var node yamlv3.Node
+			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
+
+			output, err := ToYAMLString(node)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output).To(BeEquivalentTo(expected))
+		})
 	})
 })
