@@ -305,7 +305,9 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 		}
 
 	case yamlv3.AliasNode:
-		return fmt.Errorf("kind AliasNode is not implemented yet")
+		if err := p.neatYAMLofNode(prefix, skipIndentOnFirstLine, node.Alias); err != nil {
+			return err
+		}
 	}
 
 	return nil
