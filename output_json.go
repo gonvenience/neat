@@ -27,6 +27,7 @@ import (
 
 	"github.com/gonvenience/bunt"
 	yamlv2 "gopkg.in/yaml.v2"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 // ToJSONString marshals the provided object into JSON with text decorations
@@ -49,14 +50,60 @@ func (p *OutputProcessor) ToJSON(obj interface{}) (string, error) {
 	return out, nil
 }
 
-// ToCompactJSON processed the provided input object and tries to create a as compact
-// as possible output.
+// ToCompactJSON processed the provided input object and tries to create a as
+// compact as possible output
 func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
-	switch v := obj.(type) {
+	switch tobj := obj.(type) {
+	case *yamlv3.Node:
+		switch tobj.Kind {
+		case yamlv3.DocumentNode:
+			return p.ToCompactJSON(tobj.Content[0])
+
+		case yamlv3.MappingNode:
+			tmp := []string{}
+			for i := 0; i < len(tobj.Content); i += 2 {
+				k, v := tobj.Content[i], tobj.Content[i+1]
+
+				key, err := p.ToCompactJSON(k)
+				if err != nil {
+					return "", err
+				}
+
+				value, err := p.ToCompactJSON(v)
+				if err != nil {
+					return "", err
+				}
+
+				tmp = append(tmp, fmt.Sprintf("%s: %s", key, value))
+			}
+
+			return fmt.Sprintf("{%s}", strings.Join(tmp, ", ")), nil
+
+		case yamlv3.SequenceNode:
+			tmp := []string{}
+			for _, e := range tobj.Content {
+				entry, err := p.ToCompactJSON(e)
+				if err != nil {
+					return "", err
+				}
+
+				tmp = append(tmp, entry)
+			}
+
+			return fmt.Sprintf("[%s]", strings.Join(tmp, ", ")), nil
+
+		case yamlv3.ScalarNode:
+			switch tobj.Tag {
+			case "!!str":
+				return fmt.Sprintf("\"%s\"", tobj.Value), nil
+			}
+
+			return tobj.Value, nil
+		}
 
 	case []interface{}:
 		result := make([]string, 0)
-		for _, i := range v {
+		for _, i := range tobj {
 			value, err := p.ToCompactJSON(i)
 			if err != nil {
 				return "", err
@@ -68,7 +115,7 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 
 	case yamlv2.MapSlice:
 		result := make([]string, 0)
-		for _, i := range v {
+		for _, i := range tobj {
 			value, err := p.ToCompactJSON(i)
 			if err != nil {
 				return "", err
@@ -79,26 +126,25 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 		return fmt.Sprintf("{%s}", strings.Join(result, ", ")), nil
 
 	case yamlv2.MapItem:
-		key, keyError := p.ToCompactJSON(v.Key)
+		key, keyError := p.ToCompactJSON(tobj.Key)
 		if keyError != nil {
 			return "", keyError
 		}
 
-		value, valueError := p.ToCompactJSON(v.Value)
+		value, valueError := p.ToCompactJSON(tobj.Value)
 		if valueError != nil {
 			return "", valueError
 		}
 
 		return fmt.Sprintf("%s: %s", key, value), nil
-
-	default:
-		bytes, err := json.Marshal(v)
-		if err != nil {
-			return "", err
-		}
-
-		return string(bytes), nil
 	}
+
+	bytes, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+
+	return string(bytes), nil
 }
 
 func (p *OutputProcessor) neatJSON(prefix string, obj interface{}) (string, error) {
