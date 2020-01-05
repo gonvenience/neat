@@ -219,7 +219,7 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 			entry := followAlias(node.Content[i])
 
 			if p.isScalar(entry) {
-				p.neatJSON("", entry)
+				p.neatJSON(prefix+p.prefixAdd(), entry)
 
 			} else {
 				fmt.Fprint(p.out, prefix, p.prefixAdd())
