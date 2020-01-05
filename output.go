@@ -28,6 +28,7 @@ import (
 	"github.com/gonvenience/bunt"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	yamlv2 "gopkg.in/yaml.v2"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 // DefaultColorSchema is a prepared usable color schema for the neat output
@@ -92,6 +93,23 @@ func (p *OutputProcessor) determineColorByType(obj interface{}) string {
 	color := "scalarDefaultColor"
 
 	switch t := obj.(type) {
+	case *yamlv3.Node:
+		switch t.Tag {
+		case "!!str":
+			if len(strings.Split(strings.TrimSpace(t.Value), "\n")) > 1 {
+				color = "multiLineTextColor"
+			}
+
+		case "!!int":
+			color = "intColor"
+
+		case "!!float":
+			color = "floatColor"
+
+		case "!!bool":
+			color = "boolColor"
+		}
+
 	case bool:
 		color = "boolColor"
 
@@ -111,7 +129,10 @@ func (p *OutputProcessor) determineColorByType(obj interface{}) string {
 }
 
 func (p *OutputProcessor) isScalar(obj interface{}) bool {
-	switch obj.(type) {
+	switch tobj := obj.(type) {
+	case *yamlv3.Node:
+		return tobj.Kind == yamlv3.ScalarNode
+
 	case yamlv2.MapSlice, []interface{}, []yamlv2.MapSlice:
 		return false
 
@@ -135,4 +156,12 @@ func (p *OutputProcessor) prefixAdd() string {
 	}
 
 	return p.colorize("  ", "indentLineColor")
+}
+
+func followAlias(node *yamlv3.Node) *yamlv3.Node {
+	if node != nil && node.Alias != nil {
+		return followAlias(node.Alias)
+	}
+
+	return node
 }

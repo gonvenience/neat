@@ -148,30 +148,120 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 }
 
 func (p *OutputProcessor) neatJSON(prefix string, obj interface{}) (string, error) {
+	var err error
+
 	switch t := obj.(type) {
+	case *yamlv3.Node:
+		err = p.neatJSONofNode(prefix, t)
+
 	case yamlv2.MapSlice:
-		if err := p.neatJSONofYAMLMapSlice(prefix, t); err != nil {
-			return "", err
-		}
+		err = p.neatJSONofYAMLMapSlice(prefix, t)
 
 	case []interface{}:
-		if err := p.neatJSONofSlice(prefix, t); err != nil {
-			return "", err
-		}
-
-	case []yamlv2.MapSlice:
-		if err := p.neatJSONofSlice(prefix, p.simplify(t)); err != nil {
-			return "", err
-		}
+		err = p.neatJSONofSlice(prefix, t)
 
 	default:
-		if err := p.neatJSONofScalar(prefix, obj); err != nil {
-			return "", nil
-		}
+		err = p.neatJSONofScalar(prefix, obj)
+	}
+
+	if err != nil {
+		return "", err
 	}
 
 	p.out.Flush()
 	return p.data.String(), nil
+}
+
+func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error {
+	switch node.Kind {
+	case yamlv3.DocumentNode:
+		return p.neatJSONofNode(prefix, node.Content[0])
+
+	case yamlv3.MappingNode:
+		if len(node.Content) == 0 {
+			fmt.Fprint(p.out, p.colorize("{}", "emptyStructures"))
+			return nil
+		}
+
+		bunt.Fprint(p.out, "*{*\n")
+		for i := 0; i < len(node.Content); i += 2 {
+			k, v := followAlias(node.Content[i]), followAlias(node.Content[i+1])
+
+			fmt.Fprint(p.out,
+				prefix,
+				p.prefixAdd(),
+				p.colorize(`"`+k.Value+`"`, "keyColor"), ": ",
+			)
+
+			if p.isScalar(v) {
+				p.neatJSON("", v)
+
+			} else {
+				p.neatJSON(prefix+p.prefixAdd(), v)
+			}
+
+			if i < len(node.Content)-2 {
+				fmt.Fprint(p.out, ",")
+			}
+
+			fmt.Fprint(p.out, "\n")
+		}
+		bunt.Fprint(p.out, prefix, "*}*")
+
+	case yamlv3.SequenceNode:
+		if len(node.Content) == 0 {
+			fmt.Fprint(p.out, p.colorize("[]", "emptyStructures"))
+			return nil
+		}
+
+		bunt.Fprint(p.out, "*[*\n")
+		for i := range node.Content {
+			entry := followAlias(node.Content[i])
+
+			if p.isScalar(entry) {
+				p.neatJSON("", entry)
+
+			} else {
+				fmt.Fprint(p.out, prefix, p.prefixAdd())
+				p.neatJSON(prefix+p.prefixAdd(), entry)
+			}
+
+			if i < len(node.Content)-1 {
+				fmt.Fprint(p.out, ",")
+			}
+
+			fmt.Fprint(p.out, "\n")
+		}
+		bunt.Fprint(p.out, prefix, "*]*")
+
+	case yamlv3.ScalarNode:
+		if node.Tag == "!!null" {
+			fmt.Fprint(p.out, p.colorize("null", "nullColor"))
+			return nil
+		}
+
+		color := p.determineColorByType(node)
+		quotes := func() string {
+			if node.Tag == "!!str" {
+				return p.colorize(`"`, color)
+			}
+
+			return ""
+		}
+
+		fmt.Fprint(p.out, prefix, quotes())
+		parts := strings.Split(node.Value, "\n")
+		for idx, part := range parts {
+			fmt.Fprint(p.out, p.colorize(part, color))
+
+			if idx < len(parts)-1 {
+				fmt.Fprint(p.out, p.colorize("\\n", "emptyStructures"))
+			}
+		}
+		fmt.Fprint(p.out, quotes())
+	}
+
+	return nil
 }
 
 func (p *OutputProcessor) neatJSONofYAMLMapSlice(prefix string, mapslice yamlv2.MapSlice) error {
