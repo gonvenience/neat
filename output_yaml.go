@@ -192,8 +192,17 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 		}
 
 	case yamlv3.SequenceNode:
-		for _, entry := range node.Content {
-			fmt.Fprint(p.out, prefix, p.colorize("-", "dashColor"), " ")
+		for i, entry := range node.Content {
+			if i == 0 {
+				if !skipIndentOnFirstLine {
+					fmt.Fprint(p.out, prefix)
+				}
+			} else {
+				fmt.Fprint(p.out, prefix)
+			}
+
+			fmt.Fprint(p.out, p.colorize("-", "dashColor"), " ")
+
 			if err := p.neatYAMLofNode(prefix+p.prefixAdd(), true, entry); err != nil {
 				return err
 			}
