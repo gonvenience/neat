@@ -28,6 +28,7 @@ import (
 	"strings"
 
 	"github.com/gonvenience/bunt"
+	"github.com/gonvenience/term"
 	colorful "github.com/lucasb-eyer/go-colorful"
 )
 
@@ -39,6 +40,7 @@ type boxOptions struct {
 	contentColor       *colorful.Color
 	headlineStyles     []bunt.StyleOption
 	noClosingEndOfLine bool
+	noLineWrap         bool
 }
 
 // HeadlineColor sets the color of the headline text
@@ -66,6 +68,13 @@ func ContentColor(color colorful.Color) BoxStyle {
 func NoFinalEndOfLine() BoxStyle {
 	return func(options *boxOptions) {
 		options.noClosingEndOfLine = true
+	}
+}
+
+// NoLineWrap disables line wrapping in the content box
+func NoLineWrap() BoxStyle {
+	return func(options *boxOptions) {
+		options.noLineWrap = true
 	}
 }
 
@@ -107,20 +116,55 @@ func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 		headline = bunt.Style(headline, style)
 	}
 
+	var processText = func(text string) []string {
+		if options.noLineWrap {
+			return []string{text}
+		}
+
+		words := strings.Fields(strings.TrimSpace(text))
+		if len(words) == 0 {
+			return []string{text}
+		}
+
+		var (
+			buf       bytes.Buffer
+			lines     = []string{}
+			lineWidth = term.GetTerminalWidth() - len(prefix)
+		)
+
+		buf.WriteString(words[0])
+		for _, word := range words[1:] {
+			if len(word)+1 > lineWidth-buf.Len() {
+				lines = append(lines, buf.String())
+				buf.Reset()
+				buf.WriteString(word)
+
+			} else {
+				fmt.Fprint(&buf, " ", word)
+			}
+		}
+
+		return append(lines, buf.String())
+	}
+
 	// Process each line of the content and apply styles if necessary
 	scanner := bufio.NewScanner(content)
 	for scanner.Scan() {
 		text := scanner.Text()
-		if options.contentColor != nil {
-			text = bunt.Style(text, bunt.Foreground(*options.contentColor))
-		}
 
 		if !linewritten {
 			// Write the headline string including the corner item
 			fmt.Fprintf(out, "%s %s\n", beginning, headline)
 		}
 
-		fmt.Fprintf(out, "%s %s\n", prefix, text)
+		for _, line := range processText(text) {
+			if options.contentColor != nil {
+				line = bunt.Style(line, bunt.Foreground(*options.contentColor))
+			}
+
+			fmt.Fprintf(out, "%s %s\n", prefix, line)
+		}
+
 		linewritten = true
 	}
 
