@@ -85,9 +85,6 @@ func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 		prefix      = "│"
 		lastline    = "╵"
 		linewritten = false
-		outprint    = func(format string, a ...interface{}) {
-			out.Write([]byte(fmt.Sprintf(format, a...)))
-		}
 	)
 
 	// Process all provided box style options
@@ -120,19 +117,19 @@ func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 
 		if !linewritten {
 			// Write the headline string including the corner item
-			outprint("%s %s\n", beginning, headline)
+			fmt.Fprintf(out, "%s %s\n", beginning, headline)
 		}
 
-		outprint("%s %s\n", prefix, text)
+		fmt.Fprintf(out, "%s %s\n", prefix, text)
 		linewritten = true
 	}
 
 	if linewritten {
-		outprint(lastline)
+		fmt.Fprint(out, lastline)
 
 		// If not configured otherwise, end with a linefeed
 		if !options.noClosingEndOfLine {
-			outprint("\n")
+			fmt.Fprintln(out)
 		}
 	}
 }
