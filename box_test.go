@@ -29,6 +29,7 @@ import (
 
 	. "github.com/gonvenience/bunt"
 	. "github.com/gonvenience/neat"
+	. "github.com/gonvenience/term"
 )
 
 var _ = Describe("content box", func() {
@@ -217,6 +218,54 @@ DimGray{╵}
 			Box(&buf, "headline", r)
 
 			Expect(len(buf.String())).To(BeIdenticalTo(0))
+		})
+	})
+
+	Context("using line wrap", func() {
+		var tmp int
+
+		BeforeEach(func() {
+			tmp = FixedTerminalWidth
+			FixedTerminalWidth = 80
+		})
+
+		AfterEach(func() {
+			FixedTerminalWidth = tmp
+		})
+
+		It("should wrap lines that are too long", func() {
+			Expect("\n" + ContentBox(
+				"headline",
+				"content with a very long first line, that is most likely an error message with a lot of context or similar",
+			)).To(BeEquivalentTo(Sprintf(`
+╭ headline
+│ content with a very long first line, that is most likely an error message
+│ with a lot of context or similar
+╵
+`)))
+		})
+
+		It("should not wrap long lines if wrapping is disabled", func() {
+			Expect("\n" + ContentBox(
+				"headline",
+				"content with a very long first line, that is most likely an error message with a lot of context or similar",
+				NoLineWrap(),
+			)).To(BeEquivalentTo(Sprintf(`
+╭ headline
+│ content with a very long first line, that is most likely an error message with a lot of context or similar
+╵
+`)))
+		})
+
+		It("should not fail with empty lines", func() {
+			Expect("\n" + ContentBox(
+				"headline",
+				" ",
+			)).To(BeEquivalentTo(Sprintf(`
+╭ headline
+│  
+╵
+`)))
 		})
 	})
 })
