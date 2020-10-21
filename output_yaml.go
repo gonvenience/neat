@@ -50,19 +50,13 @@ func (p *OutputProcessor) ToYAML(obj interface{}) (string, error) {
 func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, obj interface{}) error {
 	switch t := obj.(type) {
 	case yamlv2.MapSlice:
-		if err := p.neatYAMLofMapSlice(prefix, skipIndentOnFirstLine, t); err != nil {
-			return err
-		}
+		return p.neatYAMLofMapSlice(prefix, skipIndentOnFirstLine, t)
 
 	case []interface{}:
-		if err := p.neatYAMLofSlice(prefix, skipIndentOnFirstLine, t); err != nil {
-			return err
-		}
+		return p.neatYAMLofSlice(prefix, skipIndentOnFirstLine, t)
 
 	case []yamlv2.MapSlice:
-		if err := p.neatYAMLofSlice(prefix, skipIndentOnFirstLine, p.simplify(t)); err != nil {
-			return err
-		}
+		return p.neatYAMLofSlice(prefix, skipIndentOnFirstLine, p.simplify(t))
 
 	case yamlv3.Node:
 		return p.neatYAMLofNode(prefix, skipIndentOnFirstLine, &t)
@@ -71,12 +65,8 @@ func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, ob
 		return p.neatYAMLofNode(prefix, skipIndentOnFirstLine, t)
 
 	default:
-		if err := p.neatYAMLofScalar(prefix, skipIndentOnFirstLine, obj); err != nil {
-			return err
-		}
+		return p.neatYAMLofScalar(prefix, skipIndentOnFirstLine, obj)
 	}
-
-	return nil
 }
 
 func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLine bool, mapslice yamlv2.MapSlice) error {
