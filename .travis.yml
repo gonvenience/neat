@@ -8,8 +8,6 @@ install:
 
 script:
 - export GO111MODULE=on
-- go mod download
-- go mod verify
 - ginkgo -r -randomizeAllSpecs -randomizeSuites -failOnPending -nodes=4 -compilers=2 -race -trace -cover
 - staticcheck ./...
 - golint ./...
