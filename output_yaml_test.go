@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	. "github.com/gonvenience/bunt"
 	. "github.com/gonvenience/neat"
 
 	yamlv2 "gopkg.in/yaml.v2"
@@ -323,6 +324,66 @@ yaml:
 			output, err := ToYAMLString(node)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
+		})
+	})
+
+	Context("create YAML output for type struct", func() {
+		type Dependency struct {
+			Name    string `yaml:"name"`
+			Version string `yaml:"version"`
+			Active  bool   `yaml:"active"`
+		}
+
+		type Example struct {
+			Name         string       `yaml:"name"`
+			Version      string       `yaml:"version"`
+			Dependencies []Dependency `yaml:"dependencies"`
+		}
+
+		var yml = func(input string) yamlv3.Node {
+			var result yamlv3.Node
+			if err := yamlv3.Unmarshal([]byte(input), &result); err != nil {
+				Fail(err.Error())
+			}
+
+			return result
+		}
+
+		It("should output a generic type struct", func() {
+			ColorSetting = ON
+			defer func() { ColorSetting = OFF }()
+
+			expected, _ := ToYAMLString(yml(`---
+name: foobar
+version: v1.0.0
+dependencies:
+- name: foo
+  version: v0.5.0
+  active: true
+- name: bar
+  version: v0.5.0
+  active: true
+`))
+
+			output, err := ToYAMLString(Example{
+				Name:    "foobar",
+				Version: "v1.0.0",
+				Dependencies: []Dependency{
+					{
+						Name:    "foo",
+						Version: "v0.5.0",
+						Active:  true,
+					},
+					{
+						Name:    "bar",
+						Version: "v0.5.0",
+						Active:  true,
+					},
+				},
+			})
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output).To(Equal(expected))
 		})
 	})
 })

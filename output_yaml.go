@@ -22,6 +22,7 @@ package neat
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/gonvenience/bunt"
@@ -65,7 +66,13 @@ func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, ob
 		return p.neatYAMLofNode(prefix, skipIndentOnFirstLine, t)
 
 	default:
-		return p.neatYAMLofScalar(prefix, skipIndentOnFirstLine, obj)
+		switch reflect.TypeOf(obj).Kind() {
+		case reflect.Struct:
+			return p.neatYAMLOfStruct(prefix, skipIndentOnFirstLine, t)
+
+		default:
+			return p.neatYAMLofScalar(prefix, skipIndentOnFirstLine, t)
+		}
 	}
 }
 
@@ -310,6 +317,25 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 	}
 
 	return nil
+}
+
+func (p *OutputProcessor) neatYAMLOfStruct(prefix string, skipIndentOnFirstLine bool, obj interface{}) error {
+	// There might be better ways to do it. With generic struct objects, the
+	// only option is to do a roundtrip marshal and unmarshal to get the
+	// object into a universal Go YAML library version 3 node object and
+	// to render the node instead.
+
+	data, err := yamlv3.Marshal(obj)
+	if err != nil {
+		return err
+	}
+
+	var tmp yamlv3.Node
+	if err := yamlv3.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+
+	return p.neatYAML(prefix, skipIndentOnFirstLine, tmp)
 }
 
 func (p *OutputProcessor) createAnchorDefinition(node *yamlv3.Node) string {
