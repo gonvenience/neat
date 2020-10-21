@@ -112,7 +112,7 @@ var _ = Describe("error rendering", func() {
 		It("should render a context error inside a context error", func() {
 			root := fmt.Errorf("unable to load X")
 			cause := wrap.Errorf(root, "failed to start Y")
-			context := fmt.Sprintf("cannot process Z")
+			context := "cannot process Z"
 
 			err := wrap.Error(cause, context)
 			Expect(SprintError(err)).To(
@@ -125,7 +125,7 @@ var _ = Describe("error rendering", func() {
 		})
 
 		It("should render github.com/pkg/errors package errors", func() {
-			message := fmt.Sprintf("unable to start Z")
+			message := "unable to start Z"
 			cause := fmt.Errorf("failed to load X and Y")
 			err := errors.Wrap(cause, message)
 
