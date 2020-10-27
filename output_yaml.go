@@ -62,11 +62,11 @@ func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, ob
 	case yamlv3.Node:
 		return p.neatYAMLofNode(prefix, skipIndentOnFirstLine, &t)
 
-	case *yamlv3.Node:
-		return p.neatYAMLofNode(prefix, skipIndentOnFirstLine, t)
-
 	default:
 		switch reflect.TypeOf(obj).Kind() {
+		case reflect.Ptr:
+			return p.neatYAML(prefix, skipIndentOnFirstLine, reflect.ValueOf(obj).Elem().Interface())
+
 		case reflect.Struct:
 			return p.neatYAMLOfStruct(prefix, skipIndentOnFirstLine, t)
 

@@ -385,5 +385,42 @@ dependencies:
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(Equal(expected))
 		})
+
+		It("should output a pointer to a generic type struct", func() {
+			ColorSetting = ON
+			defer func() { ColorSetting = OFF }()
+
+			expected, _ := ToYAMLString(yml(`---
+name: foobar
+version: v1.0.0
+dependencies:
+- name: foo
+  version: v0.5.0
+  active: true
+- name: bar
+  version: v0.5.0
+  active: true
+`))
+
+			output, err := ToYAMLString(&Example{
+				Name:    "foobar",
+				Version: "v1.0.0",
+				Dependencies: []Dependency{
+					{
+						Name:    "foo",
+						Version: "v0.5.0",
+						Active:  true,
+					},
+					{
+						Name:    "bar",
+						Version: "v0.5.0",
+						Active:  true,
+					},
+				},
+			})
+
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output).To(Equal(expected))
+		})
 	})
 })
