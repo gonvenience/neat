@@ -94,11 +94,12 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 
 		case yamlv3.ScalarNode:
 			switch tobj.Tag {
-			case "!!str":
-				return fmt.Sprintf("\"%s\"", tobj.Value), nil
+			case "!!int", "!!float", "!!null", "!!bool":
+				return tobj.Value, nil
+
 			}
 
-			return tobj.Value, nil
+			return fmt.Sprintf("\"%s\"", tobj.Value), nil
 		}
 
 	case []interface{}:
@@ -241,15 +242,17 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 		}
 
 		color := p.determineColorByType(node)
-		quotes := func() string {
-			if node.Tag == "!!str" {
+		quote := func() string {
+			switch node.Tag {
+			case "!!int", "!!float", "!!null", "!!bool": // without quote
+				return ""
+
+			default: // with quote
 				return p.colorize(`"`, color)
 			}
-
-			return ""
 		}
 
-		fmt.Fprint(p.out, prefix, quotes())
+		fmt.Fprint(p.out, prefix, quote())
 		parts := strings.Split(node.Value, "\n")
 		for idx, part := range parts {
 			fmt.Fprint(p.out, p.colorize(part, color))
@@ -258,7 +261,7 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 				fmt.Fprint(p.out, p.colorize("\\n", "emptyStructures"))
 			}
 		}
-		fmt.Fprint(p.out, quotes())
+		fmt.Fprint(p.out, quote())
 	}
 
 	return nil
