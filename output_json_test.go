@@ -21,11 +21,12 @@
 package neat_test
 
 import (
+	. "github.com/gonvenience/neat"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	yamlv2 "gopkg.in/yaml.v2"
 
-	. "github.com/gonvenience/neat"
+	yamlv2 "gopkg.in/yaml.v2"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 var _ = Describe("JSON output", func() {
@@ -117,6 +118,27 @@ var _ = Describe("JSON output", func() {
   "empty-map": {},
   "empty-list": [],
   "empty-scalar": null
+}`))
+		})
+
+		It("should not create JSON output with unquoted timestamps (https://github.com/gonvenience/neat/issues/69)", func() {
+			example := func() *yamlv3.Node {
+				var node yamlv3.Node
+				if err := yamlv3.Unmarshal([]byte(`timestamp: 2021-08-21T00:00:00Z`), &node); err != nil {
+					Fail(err.Error())
+				}
+
+				return &node
+			}()
+
+			result, err := NewOutputProcessor(false, false, &DefaultColorSchema).ToCompactJSON(example)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result).To(Equal(`{"timestamp": "2021-08-21T00:00:00Z"}`))
+
+			result, err = NewOutputProcessor(false, false, &DefaultColorSchema).ToJSON(example)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result).To(Equal(`{
+  "timestamp": "2021-08-21T00:00:00Z"
 }`))
 		})
 	})
