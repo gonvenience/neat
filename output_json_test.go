@@ -121,6 +121,35 @@ var _ = Describe("JSON output", func() {
 }`))
 		})
 
+		It("should create compact JSON with correct quotes for different types", func() {
+			result, err := ToJSONString([]interface{}{
+				"string",
+				42.0,
+				42,
+				true,
+			})
+
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(`["string", 42, 42, true]`))
+		})
+
+		It("should create JSON with correct quotes for different types", func() {
+			result, err := NewOutputProcessor(true, true, &DefaultColorSchema).ToJSON([]interface{}{
+				"string",
+				42.0,
+				42,
+				true,
+			})
+
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(`[
+  "string",
+  42,
+  42,
+  true
+]`))
+		})
+
 		It("should not create JSON output with unquoted timestamps (https://github.com/gonvenience/neat/issues/69)", func() {
 			example := func() *yamlv3.Node {
 				var node yamlv3.Node
