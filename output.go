@@ -108,6 +108,9 @@ func (p *OutputProcessor) determineColorByType(obj interface{}) string {
 
 		case "!!bool":
 			color = "boolColor"
+
+		case "!!null":
+			color = "nullColor"
 		}
 
 	case bool:

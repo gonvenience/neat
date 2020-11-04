@@ -23,7 +23,9 @@ package neat
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gonvenience/bunt"
 	yamlv2 "gopkg.in/yaml.v2"
@@ -236,32 +238,20 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 		bunt.Fprint(p.out, prefix, "*]*")
 
 	case yamlv3.ScalarNode:
-		if node.Tag == "!!null" {
-			fmt.Fprint(p.out, p.colorize("null", "nullColor"))
-			return nil
+		obj, err := cast(*node)
+		if err != nil {
+			return err
 		}
 
-		color := p.determineColorByType(node)
-		quote := func() string {
-			switch node.Tag {
-			case "!!int", "!!float", "!!null", "!!bool": // without quote
-				return ""
-
-			default: // with quote
-				return p.colorize(`"`, color)
-			}
+		bytes, err := json.Marshal(obj)
+		if err != nil {
+			return err
 		}
 
-		fmt.Fprint(p.out, prefix, quote())
-		parts := strings.Split(node.Value, "\n")
-		for idx, part := range parts {
-			fmt.Fprint(p.out, p.colorize(part, color))
-
-			if idx < len(parts)-1 {
-				fmt.Fprint(p.out, p.colorize("\\n", "emptyStructures"))
-			}
-		}
-		fmt.Fprint(p.out, quote())
+		fmt.Fprint(p.out, p.colorize(
+			string(bytes),
+			p.determineColorByType(node),
+		))
 	}
 
 	return nil
@@ -357,4 +347,35 @@ func (p *OutputProcessor) neatJSONofScalar(prefix string, obj interface{}) error
 	}
 
 	return nil
+}
+
+func cast(node yamlv3.Node) (interface{}, error) {
+	if node.Kind != yamlv3.ScalarNode {
+		return nil, fmt.Errorf("invalid node kind to cast, must be a scalar node")
+	}
+
+	switch node.Tag {
+	case "!!str":
+		return node.Value, nil
+
+	case "!!timestamp":
+		return time.Parse(time.RFC3339, node.Value)
+
+	case "!!int":
+		return strconv.Atoi(node.Value)
+
+	case "!!float":
+		return strconv.ParseFloat(node.Value, 64)
+
+	case "!!bool":
+		return strconv.ParseBool(node.Value)
+
+	case "!!null":
+		return nil, nil
+
+	default:
+		return nil, fmt.Errorf("unknown tag %s", node.Tag)
+	}
+
+	// return nil, fmt.Errorf("failed to cast scalar node to a type")
 }
