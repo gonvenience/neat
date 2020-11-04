@@ -176,6 +176,35 @@ func (p *OutputProcessor) neatJSON(prefix string, obj interface{}) (string, erro
 }
 
 func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error {
+	var (
+		optionalLineBreak = func() string {
+			switch node.Style {
+			case yamlv3.FlowStyle:
+				return ""
+			}
+
+			return "\n"
+		}
+
+		optionalIndentPrefix = func() string {
+			switch node.Style {
+			case yamlv3.FlowStyle:
+				return ""
+			}
+
+			return prefix + p.prefixAdd()
+		}
+
+		optionalPrefixBeforeEnd = func() string {
+			switch node.Style {
+			case yamlv3.FlowStyle:
+				return ""
+			}
+
+			return prefix
+		}
+	)
+
 	switch node.Kind {
 	case yamlv3.DocumentNode:
 		return p.neatJSONofNode(prefix, node.Content[0])
@@ -186,13 +215,12 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 			return nil
 		}
 
-		bunt.Fprint(p.out, "*{*\n")
+		bunt.Fprint(p.out, "*{*", optionalLineBreak())
 		for i := 0; i < len(node.Content); i += 2 {
 			k, v := followAlias(node.Content[i]), followAlias(node.Content[i+1])
 
 			fmt.Fprint(p.out,
-				prefix,
-				p.prefixAdd(),
+				optionalIndentPrefix(),
 				p.colorize(`"`+k.Value+`"`, "keyColor"), ": ",
 			)
 
@@ -207,9 +235,9 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 				fmt.Fprint(p.out, ",")
 			}
 
-			fmt.Fprint(p.out, "\n")
+			fmt.Fprint(p.out, optionalLineBreak())
 		}
-		bunt.Fprint(p.out, prefix, "*}*")
+		bunt.Fprint(p.out, optionalPrefixBeforeEnd(), "*}*")
 
 	case yamlv3.SequenceNode:
 		if len(node.Content) == 0 {
@@ -217,12 +245,12 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 			return nil
 		}
 
-		bunt.Fprint(p.out, "*[*\n")
+		bunt.Fprint(p.out, "*[*", optionalLineBreak())
 		for i := range node.Content {
 			entry := followAlias(node.Content[i])
 
 			if p.isScalar(entry) {
-				p.neatJSON(prefix+p.prefixAdd(), entry)
+				p.neatJSON(optionalIndentPrefix(), entry)
 
 			} else {
 				fmt.Fprint(p.out, prefix, p.prefixAdd())
@@ -233,9 +261,9 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 				fmt.Fprint(p.out, ",")
 			}
 
-			fmt.Fprint(p.out, "\n")
+			fmt.Fprint(p.out, optionalLineBreak())
 		}
-		bunt.Fprint(p.out, prefix, "*]*")
+		bunt.Fprint(p.out, optionalPrefixBeforeEnd(), "*]*")
 
 	case yamlv3.ScalarNode:
 		obj, err := cast(*node)
@@ -248,10 +276,12 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 			return err
 		}
 
-		fmt.Fprint(p.out, p.colorize(
-			string(bytes),
-			p.determineColorByType(node),
-		))
+		fmt.Fprint(p.out,
+			prefix,
+			p.colorize(
+				string(bytes),
+				p.determineColorByType(node),
+			))
 	}
 
 	return nil
