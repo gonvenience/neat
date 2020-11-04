@@ -95,13 +95,17 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 			return fmt.Sprintf("[%s]", strings.Join(tmp, ", ")), nil
 
 		case yamlv3.ScalarNode:
-			switch tobj.Tag {
-			case "!!int", "!!float", "!!null", "!!bool":
-				return tobj.Value, nil
-
+			obj, err := cast(*tobj)
+			if err != nil {
+				return "", err
 			}
 
-			return fmt.Sprintf("\"%s\"", tobj.Value), nil
+			bytes, err := json.Marshal(obj)
+			if err != nil {
+				return "", err
+			}
+
+			return string(bytes), nil
 		}
 
 	case []interface{}:
