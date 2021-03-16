@@ -23,6 +23,7 @@ package neat
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/gonvenience/bunt"
@@ -79,7 +80,20 @@ func NewOutputProcessor(useIndentLines bool, boldKeys bool, colorSchema *map[str
 	}
 }
 
+// Deprecated: Use colorizef instead
 func (p *OutputProcessor) colorize(text string, colorName string) string {
+	if p.colorSchema != nil {
+		if value, ok := (*p.colorSchema)[colorName]; ok {
+			return bunt.Style(text, bunt.Foreground(value))
+		}
+	}
+
+	return text
+}
+
+func (p *OutputProcessor) colorizef(colorName string, format string, a ...interface{}) string {
+	var text = fmt.Sprintf(format, a...)
+
 	if p.colorSchema != nil {
 		if value, ok := (*p.colorSchema)[colorName]; ok {
 			return bunt.Style(text, bunt.Foreground(value))
