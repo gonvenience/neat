@@ -25,15 +25,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	. "github.com/gonvenience/bunt"
 )
 
 func TestCore(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "neat suite")
 }
-
-var _ = BeforeSuite(func() {
-	ColorSetting = OFF
-})

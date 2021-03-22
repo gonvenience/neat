@@ -350,8 +350,8 @@ yaml:
 		}
 
 		It("should output a generic type struct", func() {
-			ColorSetting = ON
-			defer func() { ColorSetting = OFF }()
+			SetColorSettings(ON, ON)
+			defer SetColorSettings(AUTO, AUTO)
 
 			expected, _ := ToYAMLString(yml(`---
 name: foobar
@@ -387,8 +387,8 @@ dependencies:
 		})
 
 		It("should output a pointer to a generic type struct", func() {
-			ColorSetting = ON
-			defer func() { ColorSetting = OFF }()
+			SetColorSettings(ON, ON)
+			defer SetColorSettings(AUTO, AUTO)
 
 			expected, _ := ToYAMLString(yml(`---
 name: foobar

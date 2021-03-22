@@ -34,13 +34,11 @@ import (
 
 var _ = Describe("content box", func() {
 	BeforeEach(func() {
-		ColorSetting = ON
-		TrueColorSetting = ON
+		SetColorSettings(ON, ON)
 	})
 
 	AfterEach(func() {
-		ColorSetting = OFF
-		TrueColorSetting = OFF
+		SetColorSettings(AUTO, AUTO)
 	})
 
 	Context("rendering content boxes", func() {

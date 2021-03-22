@@ -30,22 +30,19 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	. "github.com/gonvenience/bunt"
 	. "github.com/gonvenience/neat"
-
-	"github.com/gonvenience/bunt"
 	"github.com/gonvenience/wrap"
 	"github.com/pkg/errors"
 )
 
 var _ = Describe("error rendering", func() {
 	BeforeEach(func() {
-		bunt.ColorSetting = bunt.ON
-		bunt.TrueColorSetting = bunt.ON
+		SetColorSettings(ON, ON)
 	})
 
 	AfterEach(func() {
-		bunt.ColorSetting = bunt.OFF
-		bunt.TrueColorSetting = bunt.OFF
+		SetColorSettings(AUTO, AUTO)
 	})
 
 	Context("rendering errors", func() {
@@ -58,8 +55,8 @@ var _ = Describe("error rendering", func() {
 				BeEquivalentTo(ContentBox(
 					"Error: "+context,
 					cause.Error(),
-					HeadlineColor(bunt.OrangeRed),
-					ContentColor(bunt.Red),
+					HeadlineColor(OrangeRed),
+					ContentColor(Red),
 				)))
 		})
 
@@ -73,8 +70,8 @@ var _ = Describe("error rendering", func() {
 				BeEquivalentTo(ContentBox(
 					"Error",
 					"failed to do X",
-					HeadlineColor(bunt.OrangeRed),
-					ContentColor(bunt.Red),
+					HeadlineColor(OrangeRed),
+					ContentColor(Red),
 				)))
 		})
 
@@ -104,8 +101,8 @@ var _ = Describe("error rendering", func() {
 				BeEquivalentTo(ContentBox(
 					"Error",
 					"failed to do X",
-					HeadlineColor(bunt.OrangeRed),
-					ContentColor(bunt.Red),
+					HeadlineColor(OrangeRed),
+					ContentColor(Red),
 				)))
 		})
 
@@ -119,8 +116,8 @@ var _ = Describe("error rendering", func() {
 				BeEquivalentTo(ContentBox(
 					"Error: "+context,
 					SprintError(cause),
-					HeadlineColor(bunt.OrangeRed),
-					ContentColor(bunt.Red),
+					HeadlineColor(OrangeRed),
+					ContentColor(Red),
 				)))
 		})
 
@@ -133,8 +130,8 @@ var _ = Describe("error rendering", func() {
 				BeEquivalentTo(ContentBox(
 					"Error: "+message,
 					cause.Error(),
-					HeadlineColor(bunt.OrangeRed),
-					ContentColor(bunt.Red),
+					HeadlineColor(OrangeRed),
+					ContentColor(Red),
 				)))
 		})
 	})
