@@ -21,15 +21,25 @@
 package neat_test
 
 import (
-	. "github.com/gonvenience/neat"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	. "github.com/gonvenience/bunt"
+	. "github.com/gonvenience/neat"
 
 	yamlv2 "gopkg.in/yaml.v2"
 	yamlv3 "gopkg.in/yaml.v3"
 )
 
 var _ = Describe("JSON output", func() {
+	BeforeEach(func() {
+		SetColorSettings(OFF, OFF)
+	})
+
+	AfterEach(func() {
+		SetColorSettings(AUTO, AUTO)
+	})
+
 	Context("create JSON output", func() {
 		It("should create JSON output for a simple list", func() {
 			result, err := ToJSONString([]interface{}{

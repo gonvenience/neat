@@ -32,6 +32,14 @@ import (
 )
 
 var _ = Describe("YAML output", func() {
+	BeforeEach(func() {
+		SetColorSettings(OFF, OFF)
+	})
+
+	AfterEach(func() {
+		SetColorSettings(AUTO, AUTO)
+	})
+
 	Context("process input JSON for YAML output", func() {
 		It("should convert JSON to YAML", func() {
 			var content yamlv2.MapSlice
