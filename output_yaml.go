@@ -292,13 +292,12 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 			colorName = "multiLineTextColor"
 			fmt.Fprint(p.out, p.colorize("|", colorName), "\n")
 			for i, line := range lines {
-				if i == len(lines)-1 {
-					continue
-				}
+				fmt.Fprint(p.out,
+					prefix,
+					p.colorize(line, colorName),
+				)
 
-				fmt.Fprint(p.out, prefix, p.colorize(line, colorName))
-
-				if i < len(lines)-2 {
+				if i != len(lines)-1 {
 					fmt.Fprint(p.out, "\n")
 				}
 			}

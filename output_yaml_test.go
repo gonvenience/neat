@@ -194,7 +194,7 @@ list: # at list definition
 - two # two
 
 # before multiline
-multiline: |
+multiline: |-
   This is
   a multi
   line te
@@ -324,6 +324,37 @@ yaml:
   - id: C
   - id: X
   - id: Z
+`
+
+			var node yamlv3.Node
+			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
+
+			output, err := ToYAMLString(node)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output).To(BeEquivalentTo(expected))
+		})
+
+		It("should create YAML output of multi-line text", func() {
+			example := []byte(`---
+data:
+  repos.yaml: |-
+    repos:
+    - apply_requirements:
+      - approved
+      - mergeable
+      id: /.*/
+      test: /.*/
+`)
+
+			expected := `---
+data:
+  repos.yaml: |
+    repos:
+    - apply_requirements:
+      - approved
+      - mergeable
+      id: /.*/
+      test: /.*/
 `
 
 			var node yamlv3.Node
