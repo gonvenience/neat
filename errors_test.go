@@ -90,7 +90,8 @@ var _ = Describe("error rendering", func() {
 				w.Close()
 
 				var buf bytes.Buffer
-				io.Copy(&buf, r)
+				_, err = io.Copy(&buf, r)
+				Expect(err).ToNot(HaveOccurred())
 
 				return buf.String()
 			}

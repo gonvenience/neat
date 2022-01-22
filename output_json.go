@@ -293,73 +293,77 @@ func (p *OutputProcessor) neatJSONofNode(prefix string, node *yamlv3.Node) error
 
 func (p *OutputProcessor) neatJSONofYAMLMapSlice(prefix string, mapslice yamlv2.MapSlice) error {
 	if len(mapslice) == 0 {
-		p.out.WriteString(p.colorize("{}", "emptyStructures"))
+		_, _ = p.out.WriteString(p.colorize("{}", "emptyStructures"))
 		return nil
 	}
 
-	p.out.WriteString(bunt.Style("{", bunt.Bold()))
-	p.out.WriteString("\n")
+	_, _ = p.out.WriteString(bunt.Style("{", bunt.Bold()))
+	_, _ = p.out.WriteString("\n")
 
 	for idx, mapitem := range mapslice {
 		keyString := fmt.Sprintf("\"%v\": ", mapitem.Key)
 
-		p.out.WriteString(prefix + p.prefixAdd())
-		p.out.WriteString(p.colorize(keyString, "keyColor"))
+		_, _ = p.out.WriteString(prefix + p.prefixAdd())
+		_, _ = p.out.WriteString(p.colorize(keyString, "keyColor"))
 
 		if p.isScalar(mapitem.Value) {
-			p.neatJSONofScalar("", mapitem.Value)
+			if err := p.neatJSONofScalar("", mapitem.Value); err != nil {
+				return err
+			}
 
 		} else {
 			p.neatJSON(prefix+p.prefixAdd(), mapitem.Value)
 		}
 
 		if idx < len(mapslice)-1 {
-			p.out.WriteString(",")
+			_, _ = p.out.WriteString(",")
 		}
 
-		p.out.WriteString("\n")
+		_, _ = p.out.WriteString("\n")
 	}
 
-	p.out.WriteString(prefix)
-	p.out.WriteString(bunt.Style("}", bunt.Bold()))
+	_, _ = p.out.WriteString(prefix)
+	_, _ = p.out.WriteString(bunt.Style("}", bunt.Bold()))
 
 	return nil
 }
 
 func (p *OutputProcessor) neatJSONofSlice(prefix string, list []interface{}) error {
 	if len(list) == 0 {
-		p.out.WriteString(p.colorize("[]", "emptyStructures"))
+		_, _ = p.out.WriteString(p.colorize("[]", "emptyStructures"))
 		return nil
 	}
 
-	p.out.WriteString(bunt.Style("[", bunt.Bold()))
-	p.out.WriteString("\n")
+	_, _ = p.out.WriteString(bunt.Style("[", bunt.Bold()))
+	_, _ = p.out.WriteString("\n")
 
 	for idx, value := range list {
 		if p.isScalar(value) {
-			p.neatJSONofScalar(prefix+p.prefixAdd(), value)
+			if err := p.neatJSONofScalar(prefix+p.prefixAdd(), value); err != nil {
+				return err
+			}
 
 		} else {
-			p.out.WriteString(prefix + p.prefixAdd())
+			_, _ = p.out.WriteString(prefix + p.prefixAdd())
 			p.neatJSON(prefix+p.prefixAdd(), value)
 		}
 
 		if idx < len(list)-1 {
-			p.out.WriteString(",")
+			_, _ = p.out.WriteString(",")
 		}
 
-		p.out.WriteString("\n")
+		_, _ = p.out.WriteString("\n")
 	}
 
-	p.out.WriteString(prefix)
-	p.out.WriteString(bunt.Style("]", bunt.Bold()))
+	_, _ = p.out.WriteString(prefix)
+	_, _ = p.out.WriteString(bunt.Style("]", bunt.Bold()))
 
 	return nil
 }
 
 func (p *OutputProcessor) neatJSONofScalar(prefix string, obj interface{}) error {
 	if obj == nil {
-		p.out.WriteString(p.colorize("null", "nullColor"))
+		_, _ = p.out.WriteString(p.colorize("null", "nullColor"))
 		return nil
 	}
 
@@ -370,13 +374,13 @@ func (p *OutputProcessor) neatJSONofScalar(prefix string, obj interface{}) error
 
 	color := p.determineColorByType(obj)
 
-	p.out.WriteString(prefix)
+	_, _ = p.out.WriteString(prefix)
 	parts := strings.Split(string(data), "\\n")
 	for idx, part := range parts {
-		p.out.WriteString(p.colorize(part, color))
+		_, _ = p.out.WriteString(p.colorize(part, color))
 
 		if idx < len(parts)-1 {
-			p.out.WriteString(p.colorize("\\n", "emptyStructures"))
+			_, _ = p.out.WriteString(p.colorize("\\n", "emptyStructures"))
 		}
 	}
 

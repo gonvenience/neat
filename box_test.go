@@ -188,10 +188,10 @@ DimGray{╵}
 		It("should create a box using a reader", func() {
 			r, w := io.Pipe()
 			go func() {
-				w.Write([]byte("multi\n"))
-				w.Write([]byte("line\n"))
-				w.Write([]byte("content\n"))
-				w.Close()
+				_, _ = w.Write([]byte("multi\n"))
+				_, _ = w.Write([]byte("line\n"))
+				_, _ = w.Write([]byte("content\n"))
+				_ = w.Close()
 			}()
 
 			var buf bytes.Buffer

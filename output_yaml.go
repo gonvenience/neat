@@ -79,7 +79,7 @@ func (p *OutputProcessor) neatYAML(prefix string, skipIndentOnFirstLine bool, ob
 func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLine bool, mapslice yamlv2.MapSlice) error {
 	for i, mapitem := range mapslice {
 		if !skipIndentOnFirstLine || i > 0 {
-			p.out.WriteString(prefix)
+			_, _ = p.out.WriteString(prefix)
 		}
 
 		keyString := fmt.Sprintf("%v:", mapitem.Key)
@@ -87,17 +87,17 @@ func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLin
 			keyString = bunt.Style(keyString, bunt.Bold())
 		}
 
-		p.out.WriteString(p.colorize(keyString, "keyColor"))
+		_, _ = p.out.WriteString(p.colorize(keyString, "keyColor"))
 
 		switch mapitem.Value.(type) {
 		case yamlv2.MapSlice:
 			if len(mapitem.Value.(yamlv2.MapSlice)) == 0 {
-				p.out.WriteString(" ")
-				p.out.WriteString(p.colorize("{}", "emptyStructures"))
-				p.out.WriteString("\n")
+				_, _ = p.out.WriteString(" ")
+				_, _ = p.out.WriteString(p.colorize("{}", "emptyStructures"))
+				_, _ = p.out.WriteString("\n")
 
 			} else {
-				p.out.WriteString("\n")
+				_, _ = p.out.WriteString("\n")
 				if err := p.neatYAMLofMapSlice(prefix+p.prefixAdd(), false, mapitem.Value.(yamlv2.MapSlice)); err != nil {
 					return err
 				}
@@ -105,18 +105,18 @@ func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLin
 
 		case []interface{}:
 			if len(mapitem.Value.([]interface{})) == 0 {
-				p.out.WriteString(" ")
-				p.out.WriteString(p.colorize("[]", "emptyStructures"))
-				p.out.WriteString("\n")
+				_, _ = p.out.WriteString(" ")
+				_, _ = p.out.WriteString(p.colorize("[]", "emptyStructures"))
+				_, _ = p.out.WriteString("\n")
 			} else {
-				p.out.WriteString("\n")
+				_, _ = p.out.WriteString("\n")
 				if err := p.neatYAMLofSlice(prefix, false, mapitem.Value.([]interface{})); err != nil {
 					return err
 				}
 			}
 
 		default:
-			p.out.WriteString(" ")
+			_, _ = p.out.WriteString(" ")
 			if err := p.neatYAMLofScalar(prefix, false, mapitem.Value); err != nil {
 				return err
 			}
@@ -128,9 +128,9 @@ func (p *OutputProcessor) neatYAMLofMapSlice(prefix string, skipIndentOnFirstLin
 
 func (p *OutputProcessor) neatYAMLofSlice(prefix string, skipIndentOnFirstLine bool, list []interface{}) error {
 	for _, entry := range list {
-		p.out.WriteString(prefix)
-		p.out.WriteString(p.colorize("-", "dashColor"))
-		p.out.WriteString(" ")
+		_, _ = p.out.WriteString(prefix)
+		_, _ = p.out.WriteString(p.colorize("-", "dashColor"))
+		_, _ = p.out.WriteString(" ")
 		if err := p.neatYAML(prefix+p.prefixAdd(), true, entry); err != nil {
 			return err
 		}
@@ -142,8 +142,8 @@ func (p *OutputProcessor) neatYAMLofSlice(prefix string, skipIndentOnFirstLine b
 func (p *OutputProcessor) neatYAMLofScalar(prefix string, skipIndentOnFirstLine bool, obj interface{}) error {
 	// Process nil values immediately and return afterwards
 	if obj == nil {
-		p.out.WriteString(p.colorize("null", "nullColor"))
-		p.out.WriteString("\n")
+		_, _ = p.out.WriteString(p.colorize("null", "nullColor"))
+		_, _ = p.out.WriteString("\n")
 		return nil
 	}
 
@@ -159,11 +159,11 @@ func (p *OutputProcessor) neatYAMLofScalar(prefix string, skipIndentOnFirstLine 
 	// Cast byte slice to string, remove trailing newlines, split into lines
 	for i, line := range strings.Split(strings.TrimSpace(string(data)), "\n") {
 		if i > 0 {
-			p.out.WriteString(prefix)
+			_, _ = p.out.WriteString(prefix)
 		}
 
-		p.out.WriteString(p.colorize(line, color))
-		p.out.WriteString("\n")
+		_, _ = p.out.WriteString(p.colorize(line, color))
+		_, _ = p.out.WriteString("\n")
 	}
 
 	return nil
