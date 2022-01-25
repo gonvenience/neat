@@ -3,7 +3,7 @@ module github.com/gonvenience/neat
 go 1.17
 
 require (
-	github.com/gonvenience/bunt v1.3.2
+	github.com/gonvenience/bunt v1.3.3
 	github.com/gonvenience/term v1.0.1
 	github.com/gonvenience/wrap v1.1.1
 	github.com/lucasb-eyer/go-colorful v1.2.0
