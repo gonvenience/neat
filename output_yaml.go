@@ -282,7 +282,7 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 		lines := strings.Split(node.Value, "\n")
 		switch len(lines) {
 		case 1:
-			if strings.ContainsAny(node.Value, " *&:") {
+			if strings.ContainsAny(node.Value, " *&:,") {
 				fmt.Fprint(p.out, p.colorizef(colorName, `"%s"`, node.Value))
 			} else {
 				fmt.Fprint(p.out, p.colorizef(colorName, node.Value))
