@@ -32,15 +32,15 @@ import (
 )
 
 var _ = Describe("JSON output", func() {
-	BeforeEach(func() {
-		SetColorSettings(OFF, OFF)
-	})
-
-	AfterEach(func() {
-		SetColorSettings(AUTO, AUTO)
-	})
-
 	Context("create JSON output", func() {
+		BeforeEach(func() {
+			SetColorSettings(OFF, OFF)
+		})
+
+		AfterEach(func() {
+			SetColorSettings(AUTO, AUTO)
+		})
+
 		It("should create JSON output for a simple list", func() {
 			result, err := ToJSONString([]interface{}{
 				"one",
@@ -179,6 +179,26 @@ var _ = Describe("JSON output", func() {
 			Expect(result).To(Equal(`{
   "timestamp": "2021-08-21T00:00:00Z"
 }`))
+		})
+	})
+
+	Context("create JSON output with colors", func() {
+		BeforeEach(func() {
+			SetColorSettings(ON, ON)
+		})
+
+		AfterEach(func() {
+			SetColorSettings(AUTO, AUTO)
+		})
+
+		It("should create empty list output", func() {
+			result, err := NewOutputProcessor(true, true, &DefaultColorSchema).ToJSON([]interface{}{})
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(Sprint("PaleGoldenrod{[]}")))
+
+			result, err = NewOutputProcessor(true, true, &DefaultColorSchema).ToJSON(yml("[]"))
+			Expect(err).To(BeNil())
+			Expect(result).To(BeEquivalentTo(Sprint("PaleGoldenrod{[]}")))
 		})
 	})
 })

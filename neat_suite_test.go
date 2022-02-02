@@ -25,9 +25,19 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 func TestCore(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "neat suite")
+}
+
+func yml(in string) *yamlv3.Node {
+	var node yamlv3.Node
+	err := yamlv3.Unmarshal([]byte(in), &node)
+	Expect(err).To(BeNil())
+
+	return &node
 }
