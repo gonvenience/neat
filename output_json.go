@@ -50,6 +50,9 @@ func (p *OutputProcessor) ToJSON(obj interface{}) (string, error) {
 func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 	switch tobj := obj.(type) {
 	case *yamlv3.Node:
+		return p.ToCompactJSON(*tobj)
+
+	case yamlv3.Node:
 		switch tobj.Kind {
 		case yamlv3.DocumentNode:
 			return p.ToCompactJSON(tobj.Content[0])
@@ -88,7 +91,7 @@ func (p *OutputProcessor) ToCompactJSON(obj interface{}) (string, error) {
 			return fmt.Sprintf("[%s]", strings.Join(tmp, ", ")), nil
 
 		case yamlv3.ScalarNode:
-			obj, err := cast(*tobj)
+			obj, err := cast(tobj)
 			if err != nil {
 				return "", err
 			}
@@ -151,6 +154,9 @@ func (p *OutputProcessor) neatJSON(prefix string, obj interface{}) (string, erro
 	var err error
 
 	switch t := obj.(type) {
+	case yamlv3.Node:
+		err = p.neatJSONofNode(prefix, &t)
+
 	case *yamlv3.Node:
 		err = p.neatJSONofNode(prefix, t)
 
