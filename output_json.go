@@ -396,7 +396,7 @@ func cast(node yamlv3.Node) (interface{}, error) {
 		return node.Value, nil
 
 	case "!!timestamp":
-		return time.Parse(time.RFC3339, node.Value)
+		return parseTime(node.Value)
 
 	case "!!int":
 		return strconv.Atoi(node.Value)
@@ -413,6 +413,24 @@ func cast(node yamlv3.Node) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("unknown tag %s", node.Tag)
 	}
+}
 
-	// return nil, fmt.Errorf("failed to cast scalar node to a type")
+func parseTime(value string) (time.Time, error) {
+	// YAML Spec regarding timestamp: https://yaml.org/type/timestamp.html
+	var layouts = [...]string{
+		time.RFC3339,
+		"2006-01-02T15:04:05.999999999Z",
+		"2006-01-02t15:04:05.999999999-07:00",
+		"2006-01-02 15:04:05.999999999 07:00",
+		"2006-01-02 15:04:05.999999999",
+		"2006-01-02",
+	}
+
+	for _, layout := range layouts {
+		if result, err := time.Parse(layout, value); err == nil {
+			return result, nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("value %q cannot be parsed as a timestamp", value)
 }
