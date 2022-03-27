@@ -180,6 +180,21 @@ var _ = Describe("JSON output", func() {
   "timestamp": "2021-08-21T00:00:00Z"
 }`))
 		})
+
+		It("should parse all YAML spec conform timestamps", func() {
+			var example yamlv3.Node
+			Expect(yamlv3.Unmarshal([]byte(`timestamp: 2033-12-20`), &example)).To(BeNil())
+
+			result, err := NewOutputProcessor(false, false, &DefaultColorSchema).ToCompactJSON(example)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result).To(Equal(`{"timestamp": "2033-12-20T00:00:00Z"}`))
+
+			result, err = NewOutputProcessor(false, false, &DefaultColorSchema).ToJSON(example)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(result).To(Equal(`{
+  "timestamp": "2033-12-20T00:00:00Z"
+}`))
+		})
 	})
 
 	Context("create JSON output with colors", func() {
