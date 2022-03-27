@@ -42,14 +42,7 @@ func ToJSONString(obj interface{}) (string, error) {
 // ToJSON processes the provided input object and tries to neatly output it as
 // human readable JSON honoring the preferences provided to the output processor
 func (p *OutputProcessor) ToJSON(obj interface{}) (string, error) {
-	var out string
-	var err error
-
-	if out, err = p.neatJSON("", obj); err != nil {
-		return "", err
-	}
-
-	return out, nil
+	return p.neatJSON("", obj)
 }
 
 // ToCompactJSON processed the provided input object and tries to create a as
