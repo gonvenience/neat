@@ -30,10 +30,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/pkg/errors"
+
 	. "github.com/gonvenience/bunt"
 	. "github.com/gonvenience/neat"
 	"github.com/gonvenience/wrap"
-	"github.com/pkg/errors"
 )
 
 var _ = Describe("error rendering", func() {

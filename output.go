@@ -26,10 +26,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gonvenience/bunt"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	yamlv2 "gopkg.in/yaml.v2"
 	yamlv3 "gopkg.in/yaml.v3"
+
+	"github.com/gonvenience/bunt"
 )
 
 // DefaultColorSchema is a prepared usable color schema for the neat output

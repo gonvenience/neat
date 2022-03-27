@@ -25,9 +25,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/gonvenience/bunt"
 	yamlv2 "gopkg.in/yaml.v2"
 	yamlv3 "gopkg.in/yaml.v3"
+
+	"github.com/gonvenience/bunt"
 )
 
 // ToYAMLString marshals the provided object into YAML with text decorations

@@ -27,9 +27,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gonvenience/bunt"
 	yamlv2 "gopkg.in/yaml.v2"
 	yamlv3 "gopkg.in/yaml.v3"
+
+	"github.com/gonvenience/bunt"
 )
 
 // ToJSONString marshals the provided object into JSON with text decorations
