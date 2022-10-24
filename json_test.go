@@ -23,7 +23,7 @@ package neat_test
 import (
 	yamlv2 "gopkg.in/yaml.v2"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	. "github.com/gonvenience/neat"
