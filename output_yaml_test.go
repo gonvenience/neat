@@ -364,6 +364,31 @@ data:
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
 		})
+
+		It("should quote reserved keywords", func() {
+			example := []byte(`---
+data:
+  foo: "true"
+  bar: true
+  and: null
+  but: "null"
+`)
+
+			expected := `---
+data:
+  foo: "true"
+  bar: true
+  and: null
+  but: "null"
+`
+
+			var node yamlv3.Node
+			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
+
+			output, err := ToYAMLString(node)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output).To(BeEquivalentTo(expected))
+		})
 	})
 
 	Context("create YAML output for type struct", func() {
