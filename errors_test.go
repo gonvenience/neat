@@ -64,12 +64,12 @@ var _ = Describe("error rendering", func() {
 		It("should render to a writer", func() {
 			buf := bytes.Buffer{}
 			out := bufio.NewWriter(&buf)
-			FprintError(out, fmt.Errorf("failed to do X"))
+			FprintError(out, fmt.Errorf("foo: %w", fmt.Errorf("failed to do X")))
 			out.Flush()
 
 			Expect(buf.String()).To(
 				BeEquivalentTo(ContentBox(
-					"Error",
+					"Error: foo",
 					"failed to do X",
 					HeadlineColor(OrangeRed),
 					ContentColor(Red),
@@ -97,11 +97,9 @@ var _ = Describe("error rendering", func() {
 				return buf.String()
 			}
 
-			Expect(captureStdout(func() {
-				PrintError(fmt.Errorf("failed to do X"))
-			})).To(
+			Expect(captureStdout(func() { PrintError(fmt.Errorf("foo: %w", fmt.Errorf("failed to do X"))) })).To(
 				BeEquivalentTo(ContentBox(
-					"Error",
+					"Error: foo",
 					"failed to do X",
 					HeadlineColor(OrangeRed),
 					ContentColor(Red),
@@ -110,10 +108,10 @@ var _ = Describe("error rendering", func() {
 
 		It("should render a context error inside a context error", func() {
 			root := fmt.Errorf("unable to load X")
-			cause := wrap.Errorf(root, "failed to start Y")
+			cause := fmt.Errorf("failed to start Y: %w", root)
 			context := "cannot process Z"
 
-			err := wrap.Error(cause, context)
+			err := fmt.Errorf("cannot process Z: %w", cause)
 			Expect(SprintError(err)).To(
 				BeEquivalentTo(ContentBox(
 					"Error: "+context,
