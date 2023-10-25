@@ -34,7 +34,6 @@ import (
 
 	. "github.com/gonvenience/bunt"
 	. "github.com/gonvenience/neat"
-	"github.com/gonvenience/wrap"
 )
 
 var _ = Describe("error rendering", func() {
@@ -48,13 +47,12 @@ var _ = Describe("error rendering", func() {
 
 	Context("rendering errors", func() {
 		It("should render a context error using a box", func() {
-			context := fmt.Sprintf("unable to start %s", "Z")
 			cause := fmt.Errorf("failed to load X and Y")
-			err := wrap.Error(cause, context)
+			err := fmt.Errorf("unable to start Z: %w",cause)
 
 			Expect(SprintError(err)).To(
 				BeEquivalentTo(ContentBox(
-					"Error: "+context,
+					"Error: unable to start Z",
 					cause.Error(),
 					HeadlineColor(OrangeRed),
 					ContentColor(Red),
