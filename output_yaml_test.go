@@ -372,6 +372,7 @@ data:
   bar: true
   and: null
   but: "null"
+  dash: "-"
 `)
 
 			expected := `---
@@ -380,6 +381,7 @@ data:
   bar: true
   and: null
   but: "null"
+  dash: "-"
 `
 
 			var node yamlv3.Node

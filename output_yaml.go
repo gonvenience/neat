@@ -362,6 +362,11 @@ func needsQuotes(node *yamlv3.Node) bool {
 		}
 	}
 
+	// check if strings starts with a dash
+	if strings.HasPrefix(node.Value, "-") {
+		return true
+	}
+
 	// check if string contains special characters
 	return strings.ContainsAny(node.Value, " *&:,")
 }
