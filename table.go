@@ -136,14 +136,14 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 	}
 
 	cols := len(maxs)
-	options := defaultOptions(cols)
+	opts := defaultOptions(cols)
 
 	for _, userOption := range tableOptions {
-		userOption(&options)
+		userOption(&opts)
 	}
 
-	if len(options.errors) > 0 {
-		return "", options.errors[0]
+	if len(opts.errors) > 0 {
+		return "", opts.errors[0]
 	}
 
 	var (
@@ -152,33 +152,33 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 		rowLimit = len(table)
 	)
 
-	if (options.rowLimit >= 0) && (options.rowLimit < len(table)) {
-		rowLimit = options.rowLimit
+	if (opts.rowLimit >= 0) && (opts.rowLimit < len(table)) {
+		rowLimit = opts.rowLimit
 	}
 
 	for ; idx < rowLimit; idx++ {
 		row := table[idx]
 
-		if options.desiredRowWidth > 0 {
-			rawRowWidth := lookupPlainRowLength(row, maxs, options.separator)
+		if opts.desiredRowWidth > 0 {
+			rawRowWidth := lookupPlainRowLength(row, maxs, opts.separator)
 
-			if rawRowWidth > options.desiredRowWidth {
+			if rawRowWidth > opts.desiredRowWidth {
 				return "", &RowLengthExceedsDesiredWidthError{}
 			}
 
 			for y := range row {
-				maxs[y] += (options.desiredRowWidth - rawRowWidth) / cols
+				maxs[y] += (opts.desiredRowWidth - rawRowWidth) / cols
 			}
 		}
 
 		for y, cell := range row {
 			notLastCol := y < len(row)-1
 			fillment := strings.Repeat(
-				options.filler,
+				opts.filler,
 				maxs[y]-bunt.PlainTextLength(cell),
 			)
 
-			switch options.columnAlignment[y] {
+			switch opts.columnAlignment[y] {
 			case Left:
 				buf.WriteString(cell)
 				if notLastCol {
@@ -199,14 +199,14 @@ func Table(table [][]string, tableOptions ...TableOption) (string, error) {
 			}
 
 			if notLastCol {
-				buf.WriteString(options.separator)
+				buf.WriteString(opts.separator)
 			}
 		}
 
 		// Make sure to add a linefeed to the end of each line, unless it is
 		// the last line of the table and the settings indicate that there must
 		// be no linefeed at the last line
-		if lastline := idx >= rowLimit-1; !lastline || !options.omitLinefeedAtEnd {
+		if lastline := idx >= rowLimit-1; !lastline || !opts.omitLinefeedAtEnd {
 			// Special case in which the number of table rows is limited, add an
 			// ellipsis to indicate the truncation
 			if lastline && rowLimit >= 0 && rowLimit < len(table) {
