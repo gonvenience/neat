@@ -27,7 +27,7 @@ import (
 	"io"
 	"strings"
 
-	colorful "github.com/lucasb-eyer/go-colorful"
+	"github.com/lucasb-eyer/go-colorful"
 
 	"github.com/gonvenience/bunt"
 	"github.com/gonvenience/term"
@@ -98,27 +98,27 @@ func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 	)
 
 	// Process all provided box style options
-	options := &boxOptions{}
+	boxOpts := &boxOptions{}
 	for _, f := range opts {
-		f(options)
+		f(boxOpts)
 	}
 
 	// Apply headline color if it is set
-	if options.headlineColor != nil {
+	if boxOpts.headlineColor != nil {
 		for _, pointer := range []*string{&beginning, &headline, &prefix, &lastline} {
 			*pointer = bunt.Style(*pointer,
-				bunt.Foreground(*options.headlineColor),
+				bunt.Foreground(*boxOpts.headlineColor),
 			)
 		}
 	}
 
 	// Apply headline styles if they are set
-	for _, style := range options.headlineStyles {
+	for _, style := range boxOpts.headlineStyles {
 		headline = bunt.Style(headline, style)
 	}
 
 	var processText = func(text string) []string {
-		if options.noLineWrap {
+		if boxOpts.noLineWrap {
 			return []string{text}
 		}
 
@@ -159,8 +159,8 @@ func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 		}
 
 		for _, line := range processText(text) {
-			if options.contentColor != nil {
-				line = bunt.Style(line, bunt.Foreground(*options.contentColor))
+			if boxOpts.contentColor != nil {
+				line = bunt.Style(line, bunt.Foreground(*boxOpts.contentColor))
 			}
 
 			fmt.Fprintf(out, "%s %s\n", prefix, line)
@@ -173,7 +173,7 @@ func Box(out io.Writer, headline string, content io.Reader, opts ...BoxStyle) {
 		fmt.Fprint(out, lastline)
 
 		// If not configured otherwise, end with a linefeed
-		if !options.noClosingEndOfLine {
+		if !boxOpts.noClosingEndOfLine {
 			fmt.Fprintln(out)
 		}
 	}
