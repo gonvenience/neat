@@ -93,7 +93,10 @@ func (p *OutputProcessor) colorize(text string, colorName string) string {
 }
 
 func (p *OutputProcessor) colorizef(colorName string, format string, a ...interface{}) string {
-	var text = fmt.Sprintf(format, a...)
+	var text = format
+	if len(a) > 0 {
+		text = fmt.Sprintf(format, a...)
+	}
 
 	if p.colorSchema != nil {
 		if value, ok := (*p.colorSchema)[colorName]; ok {
