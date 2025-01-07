@@ -19,14 +19,10 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-        go-version: 1.23.x
+        go-version: stable
 
     - name: Check out code into the Go module directory
       uses: actions/checkout@v4
-
-    - name: Build Go Code
-      run: |
-        go build ./...
 
     - name: Run Go Unit Tests
       run: |
