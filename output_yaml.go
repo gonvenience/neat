@@ -285,7 +285,7 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 			if needsQuotes(node) {
 				fmt.Fprint(p.out, p.colorizef(colorName, `"%s"`, node.Value))
 			} else {
-				fmt.Fprint(p.out, p.colorizef(colorName, node.Value))
+				fmt.Fprint(p.out, p.colorize(node.Value, colorName))
 			}
 
 		default:
