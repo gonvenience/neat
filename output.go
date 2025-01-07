@@ -81,7 +81,7 @@ func NewOutputProcessor(useIndentLines bool, boldKeys bool, colorSchema *map[str
 	}
 }
 
-// Deprecated: Use colorizef instead
+// TODO Change signature to swap into the right order, color first, text second
 func (p *OutputProcessor) colorize(text string, colorName string) string {
 	if p.colorSchema != nil {
 		if value, ok := (*p.colorSchema)[colorName]; ok {
@@ -93,18 +93,11 @@ func (p *OutputProcessor) colorize(text string, colorName string) string {
 }
 
 func (p *OutputProcessor) colorizef(colorName string, format string, a ...interface{}) string {
-	var text = format
 	if len(a) > 0 {
-		text = fmt.Sprintf(format, a...)
+		return p.colorize(fmt.Sprintf(format, a...), colorName)
 	}
 
-	if p.colorSchema != nil {
-		if value, ok := (*p.colorSchema)[colorName]; ok {
-			return bunt.Style(text, bunt.Foreground(value))
-		}
-	}
-
-	return text
+	return p.colorize(format, colorName)
 }
 
 func (p *OutputProcessor) determineColorByType(obj interface{}) string {
