@@ -46,6 +46,16 @@ var _ = Describe("error rendering", func() {
 	})
 
 	Context("rendering errors", func() {
+		It("should render simple errors", func() {
+			Expect(SprintError(fmt.Errorf("failed to load"))).To(
+				BeEquivalentTo(ContentBox(
+					"Error",
+					"failed to load",
+					HeadlineColor(OrangeRed),
+					ContentColor(Red),
+				)))
+		})
+
 		It("should render a context error using a box", func() {
 			cause := fmt.Errorf("failed to load X and Y")
 			err := fmt.Errorf("unable to start Z: %w", cause)
