@@ -27,8 +27,8 @@ import (
 	. "github.com/gonvenience/bunt"
 	. "github.com/gonvenience/neat"
 
-	yamlv2 "gopkg.in/yaml.v2"
-	yamlv3 "gopkg.in/yaml.v3"
+	yamlv2 "go.yaml.in/yaml/v2"
+	yamlv3 "go.yaml.in/yaml/v3"
 )
 
 var _ = Describe("YAML output", func() {
