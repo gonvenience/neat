@@ -373,6 +373,7 @@ data:
   and: null
   but: "null"
   dash: "-"
+  string: "42"
 `)
 
 			expected := `---
@@ -382,6 +383,7 @@ data:
   and: null
   but: "null"
   dash: "-"
+  string: "42"
 `
 
 			var node yamlv3.Node
