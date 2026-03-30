@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/gonvenience/bunt v1.4.3
 	github.com/gonvenience/term v1.0.5
-	github.com/lucasb-eyer/go-colorful v1.3.0
+	github.com/lucasb-eyer/go-colorful v1.4.0
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	github.com/pkg/errors v0.9.1
