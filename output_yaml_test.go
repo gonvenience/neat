@@ -40,6 +40,15 @@ var _ = Describe("YAML output", func() {
 		SetColorSettings(AUTO, AUTO)
 	})
 
+	var toYAMLString = func(obj any) (string, error) {
+		return NewOutputProcessorWithDefaults().
+			BoldKeys(true).
+			UseIndentLines(false).
+			EnforceDocumentStartMarker(false).
+			ColorSchema(DefaultColorSchema).
+			ToYAML(obj)
+	}
+
 	Context("process input JSON for YAML output", func() {
 		It("should convert JSON to YAML", func() {
 			var content yamlv2.MapSlice
@@ -47,7 +56,7 @@ var _ = Describe("YAML output", func() {
 				Fail(err.Error())
 			}
 
-			result, err := ToYAMLString(content)
+			result, err := toYAMLString(content)
 			Expect(err).To(BeNil())
 
 			Expect(result).To(BeEquivalentTo(`name: foobar
@@ -65,7 +74,7 @@ list:
 				Fail(err.Error())
 			}
 
-			result, err := ToYAMLString(content)
+			result, err := toYAMLString(content)
 			Expect(err).To(BeNil())
 
 			Expect(result).To(Equal(`list:
@@ -79,7 +88,7 @@ name: foobar
 
 	Context("create YAML output (go-yaml v2)", func() {
 		It("should create YAML output for a simple list", func() {
-			result, err := ToYAMLString([]interface{}{
+			result, err := toYAMLString([]interface{}{
 				"one",
 				"two",
 				"three",
@@ -93,7 +102,7 @@ name: foobar
 		})
 
 		It("should create YAML output for a specific YAML v2 MapSlice list", func() {
-			result, err := ToYAMLString([]yamlv2.MapSlice{
+			result, err := toYAMLString([]yamlv2.MapSlice{
 				{
 					yamlv2.MapItem{
 						Key:   "name",
@@ -115,7 +124,7 @@ name: foobar
 		})
 
 		It("should create YAML output of nested maps", func() {
-			result, err := ToYAMLString(yamlv2.MapSlice{
+			result, err := toYAMLString(yamlv2.MapSlice{
 				yamlv2.MapItem{
 					Key: "map",
 					Value: yamlv2.MapSlice{
@@ -146,7 +155,7 @@ name: foobar
 		})
 
 		It("should create YAML output for empty structures", func() {
-			result, err := ToYAMLString(yamlv2.MapSlice{
+			result, err := toYAMLString(yamlv2.MapSlice{
 				yamlv2.MapItem{
 					Key:   "empty-map",
 					Value: yamlv2.MapSlice{},
@@ -225,8 +234,7 @@ anchors:
 # end of document
 `)
 
-			expected := `---
-# start of document
+			expected := `# start of document
 
 # before map
 map:
@@ -274,7 +282,7 @@ anchors:
 			var node yamlv3.Node
 			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
 
-			output, err := ToYAMLString(node)
+			output, err := toYAMLString(node)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
 		})
@@ -304,8 +312,7 @@ yaml:
   - id: Z
 `)
 
-			expected := `---
-yaml:
+			expected := `yaml:
   named-entry-list-using-name:
   - name: A
   - name: B
@@ -329,7 +336,7 @@ yaml:
 			var node yamlv3.Node
 			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
 
-			output, err := ToYAMLString(node)
+			output, err := toYAMLString(node)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
 		})
@@ -346,8 +353,7 @@ data:
       test: /.*/
 `)
 
-			expected := `---
-data:
+			expected := `data:
   repos.yaml: |
     repos:
     - apply_requirements:
@@ -360,7 +366,7 @@ data:
 			var node yamlv3.Node
 			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
 
-			output, err := ToYAMLString(node)
+			output, err := toYAMLString(node)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
 		})
@@ -376,8 +382,7 @@ data:
   string: "42"
 `)
 
-			expected := `---
-data:
+			expected := `data:
   foo: "true"
   bar: true
   and: null
@@ -389,7 +394,7 @@ data:
 			var node yamlv3.Node
 			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
 
-			output, err := ToYAMLString(node)
+			output, err := toYAMLString(node)
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
 		})
@@ -421,7 +426,7 @@ data:
 			SetColorSettings(ON, ON)
 			defer SetColorSettings(AUTO, AUTO)
 
-			expected, _ := ToYAMLString(yml(`---
+			expected, _ := toYAMLString(yml(`---
 name: foobar
 version: v1.0.0
 dependencies:
@@ -433,7 +438,7 @@ dependencies:
   active: true
 `))
 
-			output, err := ToYAMLString(Example{
+			output, err := toYAMLString(Example{
 				Name:    "foobar",
 				Version: "v1.0.0",
 				Dependencies: []Dependency{
@@ -458,7 +463,7 @@ dependencies:
 			SetColorSettings(ON, ON)
 			defer SetColorSettings(AUTO, AUTO)
 
-			expected, _ := ToYAMLString(yml(`---
+			expected, _ := toYAMLString(yml(`---
 name: foobar
 version: v1.0.0
 dependencies:
@@ -470,7 +475,7 @@ dependencies:
   active: true
 `))
 
-			output, err := ToYAMLString(&Example{
+			output, err := toYAMLString(&Example{
 				Name:    "foobar",
 				Version: "v1.0.0",
 				Dependencies: []Dependency{
