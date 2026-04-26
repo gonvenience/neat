@@ -398,6 +398,20 @@ data:
 			Expect(err).ToNot(HaveOccurred())
 			Expect(output).To(BeEquivalentTo(expected))
 		})
+
+		It("should omit the document start marker by default", func() {
+			example := []byte(`foo: bar`)
+
+			expected := `foo: bar
+`
+
+			var node yamlv3.Node
+			Expect(yamlv3.Unmarshal(example, &node)).ToNot(HaveOccurred())
+
+			output, err := toYAMLString(node)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(output).To(BeEquivalentTo(expected))
+		})
 	})
 
 	Context("create YAML output for type struct", func() {

@@ -194,7 +194,7 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 
 	switch node.Kind {
 	case yamlv3.DocumentNode:
-		if len(node.Content) != 1 && p.enforceDocumentStartMarker {
+		if p.enforceDocumentStartMarker {
 			_, _ = bunt.Fprint(p.out, p.colorize(documentStart, "---"), "\n")
 		}
 
