@@ -414,6 +414,147 @@ data:
 		})
 	})
 
+	Context("multi-line comments (go-yaml v3)", func() {
+		var render = func(processor *OutputProcessor, input string) string {
+			var node yamlv3.Node
+			Expect(yamlv3.Unmarshal([]byte(input), &node)).ToNot(HaveOccurred())
+
+			output, err := processor.ToYAML(node)
+			Expect(err).ToNot(HaveOccurred())
+			return output
+		}
+
+		It("should indent every line of a nested head comment", func() {
+			input := `rbac:
+  aggregateRoles:
+    # line one of head comment
+    # line two of head comment
+    enabled: true
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(BeEquivalentTo(input))
+		})
+
+		It("should indent every line of a nested foot comment", func() {
+			input := `rbac:
+  aggregateRoles:
+    enabled: true
+    # foot line one
+    # foot line two
+  other: true
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(BeEquivalentTo(input))
+		})
+
+		It("should indent head and foot comments of the nested example", func() {
+			input := `rbac:
+  aggregateRoles:
+    # line one of head comment
+    # line two of head comment
+    enabled: true
+  # foot line one
+  # foot line two
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(BeEquivalentTo(input))
+		})
+
+		It("should indent comments of a mapping inside a sequence entry", func() {
+			input := `list:
+  - # head one
+    # head two
+    name: foo
+    # head three
+    # head four
+    value: bar
+`
+
+			expected := `list:
+- # head one
+  # head two
+  name: foo
+  # head three
+  # head four
+  value: bar
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(BeEquivalentTo(expected))
+		})
+
+		It("should indent a foot comment of the last sequence entry like the dash", func() {
+			input := `- a
+- b
+# foot one
+# foot two
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(BeEquivalentTo(input))
+		})
+
+		It("should indent a foot comment of a nested sequence entry like its dash", func() {
+			input := `- - a
+  - b
+  # foot one
+  # foot two
+- c
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(BeEquivalentTo(input))
+		})
+
+		It("should indent a foot comment of a sequence entry inside a mapping inside a sequence", func() {
+			input := `- k: v
+  l:
+  - x
+  - y
+  # foot one
+  # foot two
+- c
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(BeEquivalentTo(input))
+		})
+
+		It("should indent every line of a document foot comment", func() {
+			input := `foo: bar
+
+# foot one
+# foot two
+`
+
+			Expect(render(NewOutputProcessorWithDefaults().UseIndentLines(false).EnforceDocumentStartMarker(false), input)).
+				To(ContainSubstring("# foot one\n# foot two\n"))
+		})
+
+		It("should use the indent lines as prefix for every comment line", func() {
+			input := `a:
+  b:
+    # head one
+    # head two
+    c: true
+`
+
+			expected := `a:
+│ b:
+│ │ # head one
+│ │ # head two
+│ │ c: true
+`
+
+			SetColorSettings(ON, ON)
+			Expect(RemoveAllEscapeSequences(render(NewOutputProcessorWithDefaults().UseIndentLines(true).EnforceDocumentStartMarker(false), input))).
+				To(BeEquivalentTo(expected))
+		})
+	})
+
 	Context("create YAML output for type struct", func() {
 		type Dependency struct {
 			Name    string `yaml:"name"`
