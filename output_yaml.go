@@ -234,7 +234,7 @@ func (p *OutputProcessor) neatYAMLofNode(prefix string, skipIndentOnFirstLine bo
 			key := node.Content[i]
 			if len(key.HeadComment) > 0 {
 				p.writeComment(prefix, key.HeadComment, true)
-				fmt.Fprint(p.out, prefix)
+				_, _ = fmt.Fprint(p.out, prefix)
 			}
 			fmt.Fprint(p.out,
 				bunt.Style(p.colorizef(colorKey, "%s:", key.Value), keyStyles...),
@@ -403,9 +403,9 @@ func needsQuotes(node *yamlv3.Node) bool {
 func (p *OutputProcessor) writeComment(prefix string, comment string, firstLinePositioned bool) {
 	for i, line := range strings.Split(comment, "\n") {
 		if i > 0 || !firstLinePositioned {
-			fmt.Fprint(p.out, prefix)
+			_, _ = fmt.Fprint(p.out, prefix)
 		}
 
-		fmt.Fprint(p.out, p.colorize(colorComment, line), "\n")
+		_, _ = fmt.Fprint(p.out, p.colorize(colorComment, line), "\n")
 	}
 }
